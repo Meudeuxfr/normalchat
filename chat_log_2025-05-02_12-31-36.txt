@@ -1,0 +1,8 @@
+2025-05-02 12:31:38 - Server: AI_Bot has joined the chat.
+2025-05-02 12:31:46 - Server: meudeux has joined the chat.
+2025-05-02 12:31:46 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:32:00 - meudeux: hello
+2025-05-02 12:32:00 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:32:09 - Server: meudeux has left the chat.
+2025-05-02 12:32:09 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:32:24 - Server: AI_Bot has left the chat.

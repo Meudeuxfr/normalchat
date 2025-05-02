@@ -1,0 +1,13 @@
+2025-05-02 14:37:16 - Server: meudeux has joined the chat.
+2025-05-02 14:39:19 - Server: AI_Bot has joined the chat.
+2025-05-02 14:39:23 - meudeux: hello
+2025-05-02 14:39:23 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 14:39:28 - meudeux: hmm
+2025-05-02 14:39:28 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 14:49:32 - meudeux: lol
+2025-05-02 14:49:32 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 14:49:49 - meudeux: do you know anything?
+2025-05-02 14:49:49 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 14:49:52 - Server: meudeux has left the chat.
+2025-05-02 14:49:52 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 14:49:53 - Server: AI_Bot has left the chat.

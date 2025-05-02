@@ -1,0 +1,48 @@
+2025-05-02 11:57:43 - Server: AI_Bot has joined the chat.
+2025-05-02 11:57:44 - Server: 1 has joined the chat.
+2025-05-02 11:57:49 - 1: hello?
+2025-05-02 11:58:22 - 1: i don't think it can talk
+2025-05-02 11:59:11 - Server: 2 has joined the chat.
+2025-05-02 11:59:15 - 2: ya
+2025-05-02 11:59:26 - 2: i think its trying
+2025-05-02 11:59:40 - Server: AI_Bot has left the chat.
+2025-05-02 12:02:03 - Server: AI_Bot has joined the chat.
+2025-05-02 12:02:11 - 1: hello?
+2025-05-02 12:02:11 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:02:14 - 1: ok
+2025-05-02 12:02:14 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:02:24 - 1: when a person says hello you say hello
+2025-05-02 12:02:24 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:02:34 - 2: hello ai bot
+2025-05-02 12:02:34 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:03:14 - 1: hmm
+2025-05-02 12:03:14 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:03:29 - 1: you don't need to always to send that message
+2025-05-02 12:03:29 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:03:44 - 2: this is quite problematic
+2025-05-02 12:03:44 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:04:07 - 2: we can't have him just send this message
+2025-05-02 12:04:07 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:05:44 - 1: btw 2 what is that you wanted to talk to me
+2025-05-02 12:05:44 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:07:48 - 2: so 1 it-s just that there is new thing happening in portugal and we don-t know, if it's a attack
+2025-05-02 12:07:48 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:07:52 - 2: or not
+2025-05-02 12:07:52 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:08:03 - 1: i don't believe it's a attack
+2025-05-02 12:08:03 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:10:05 - 1: but we can't know
+2025-05-02 12:10:05 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:10:47 - 1: so how is your day?
+2025-05-02 12:10:47 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:11:00 - 2: good and yours_
+2025-05-02 12:11:00 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:11:08 - 1: not that good
+2025-05-02 12:11:08 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:11:19 - Server: 2 has left the chat.
+2025-05-02 12:11:19 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:11:22 - Server: 1 has left the chat.
+2025-05-02 12:11:22 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 12:11:25 - Server: AI_Bot has left the chat.
+2025-05-02 12:28:07 - Server:  has joined the chat.
+2025-05-02 12:28:07 - Server:  has left the chat.
