@@ -1,0 +1,3 @@
+fine_tuned_gpt2/model.safetensors
+fine_tuned_gpt2/checkpoint-30/optimizer.pt
+fine_tuned_gpt2/checkpoint-30/model.safetensors

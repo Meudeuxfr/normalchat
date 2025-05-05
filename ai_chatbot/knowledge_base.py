@@ -7,6 +7,7 @@ class KnowledgeBase:
         self.log_file = log_file
         self.pairs = []
         self.load_chat_log()
+        self.pair_set = set(self.pairs)  # For faster lookup
 
     def load_chat_log(self):
         import glob
@@ -29,15 +30,17 @@ class KnowledgeBase:
                         user_next, msg_next = match_next.groups()
                         if user_current != "Server" and user_next != "Server":
                             self.pairs.append((msg_current.lower(), msg_next))
+                self.pair_set = set(self.pairs)
             except Exception as e:
                 print(f"Error reading {log_file}: {e}")
 
     def add_pair(self, message, response):
-        # Avoid adding duplicate pairs to prevent repetition
         pair = (message.lower(), response)
-        if pair not in self.pairs:
+        if pair not in self.pair_set:
             self.pairs.append(pair)
-            self.log_message(response)
+            self.pair_set.add(pair)
+            self.log_message(message, sender="User")
+            self.log_message(response, sender="AI_Bot")
 
     def remove_pair(self, message, response):
         pair = (message.lower(), response)
@@ -45,10 +48,10 @@ class KnowledgeBase:
             self.pairs.remove(pair)
             # Optionally, update the log file or keep as is
 
-    def log_message(self, message):
+    def log_message(self, message, sender="AI_Bot"):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(self.log_file, "a", encoding="utf-8") as f:
-            f.write(f"{timestamp} - AI_Bot: {message}\n")
+            f.write(f"{timestamp} - {sender}: {message}\n")
 
     def find_response(self, message):
         message = message.lower()
@@ -56,7 +59,16 @@ class KnowledgeBase:
         best_response = None
         for question, response in self.pairs:
             ratio = SequenceMatcher(None, question, message).ratio()
-            if ratio > best_ratio and ratio > 0.6:
+            if ratio > best_ratio and ratio > 0.5:  # Lowered threshold for faster matching
                 best_ratio = ratio
                 best_response = response
         return best_response
+
+    def save_pairs(self):
+        # Save current pairs to the log file immediately to persist learning
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                for question, response in self.pairs:
+                    f.write(f"{question}|||{response}\n")
+        except Exception as e:
+            print(f"Error saving pairs: {e}")

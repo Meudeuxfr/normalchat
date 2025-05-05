@@ -9,11 +9,18 @@ class NLPProcessor:
         return self.nlp(text)
 
     def get_intent(self, doc):
-        # Placeholder for intent recognition logic
-        # For now, just return the root verb or None
-        for token in doc:
-            if token.dep_ == "ROOT":
-                return token.lemma_
+        # Improved intent recognition using keyword matching with word boundaries
+        import re
+        text = doc.text.lower()
+        greetings = ["hello", "hi", "hey", "greetings"]
+        farewells = ["bye", "goodbye", "see you", "farewell"]
+
+        for greet in greetings:
+            if re.search(r'\\b' + re.escape(greet) + r'\\b', text):
+                return "greet"
+        for bye in farewells:
+            if re.search(r'\\b' + re.escape(bye) + r'\\b', text):
+                return "bye"
         return None
 
     def get_entities(self, doc):

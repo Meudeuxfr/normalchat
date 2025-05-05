@@ -95,3 +95,397 @@
 2025-05-02 14:49:49 - AI_Bot: I'm not sure how to respond to that yet.
 2025-05-02 14:49:49: [AI_Bot] I'm not sure how to respond to that yet.
 2025-05-02 14:49:52 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:24:18: AI_Bot has joined the chat.
+2025-05-02 16:24:30: AI_Bot has left the chat.
+2025-05-02 16:26:02: AI_Bot has joined the chat.
+2025-05-02 16:26:05 - User: [meudeux] hello
+2025-05-02 16:26:05 - AI_Bot: Hello!
+2025-05-02 16:26:05 - User: [meudeux] hello
+2025-05-02 16:26:05: [AI_Bot] Hello!
+2025-05-02 16:26:13 - User: [meudeux] how are you?
+2025-05-02 16:26:13 - AI_Bot: Hello!
+2025-05-02 16:26:13 - User: [meudeux] how are you?
+2025-05-02 16:26:13: [AI_Bot] Hello!
+2025-05-02 16:26:16 - User: [meudeux] uhhh
+2025-05-02 16:26:16 - AI_Bot: Hello!
+2025-05-02 16:26:16 - User: [meudeux] uhhh
+2025-05-02 16:26:16: [AI_Bot] Hello!
+2025-05-02 16:26:22 - User: [meudeux] can you stop?
+2025-05-02 16:26:22 - AI_Bot: Hello!
+2025-05-02 16:26:22 - User: [meudeux] can you stop?
+2025-05-02 16:26:22: [AI_Bot] Hello!
+2025-05-02 16:26:49 - User: [meudeux] bye
+2025-05-02 16:26:49 - AI_Bot: Hello!
+2025-05-02 16:26:49 - User: [meudeux] bye
+2025-05-02 16:26:49: [AI_Bot] Hello!
+2025-05-02 16:26:52: AI_Bot has left the chat.
+2025-05-02 16:27:03: AI_Bot has joined the chat.
+2025-05-02 16:27:07 - User: [meudeux] hello?
+2025-05-02 16:27:07 - AI_Bot: Hello!
+2025-05-02 16:27:07 - User: [meudeux] hello?
+2025-05-02 16:27:07: [AI_Bot] Hello!
+2025-05-02 16:27:11 - User: [meudeux] bye
+2025-05-02 16:27:11 - AI_Bot: Hello!
+2025-05-02 16:27:11 - User: [meudeux] bye
+2025-05-02 16:27:11: [AI_Bot] Hello!
+2025-05-02 16:27:14 - User: [meudeux] bruh
+2025-05-02 16:27:14 - AI_Bot: Hello!
+2025-05-02 16:27:14 - User: [meudeux] bruh
+2025-05-02 16:27:14: [AI_Bot] Hello!
+2025-05-02 16:27:44: AI_Bot has left the chat.
+2025-05-02 16:27:50: AI_Bot has joined the chat.
+2025-05-02 16:27:50 - User: [meudeux] lol
+2025-05-02 16:27:50 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:27:50 - User: [meudeux] lol
+2025-05-02 16:27:50: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:27:53 - User: [meudeux] hello
+2025-05-02 16:27:53 - AI_Bot: Hello!
+2025-05-02 16:27:53 - User: [meudeux] hello
+2025-05-02 16:27:53: [AI_Bot] Hello!
+2025-05-02 16:27:55 - User: [meudeux] bye
+2025-05-02 16:27:55 - AI_Bot: Hello!
+2025-05-02 16:27:55 - User: [meudeux] bye
+2025-05-02 16:27:55: [AI_Bot] Hello!
+2025-05-02 16:27:57 - User: [meudeux] bye
+2025-05-02 16:27:57: [AI_Bot] Hello!
+2025-05-02 16:27:58 - User: [meudeux] bye
+2025-05-02 16:27:58: [AI_Bot] Hello!
+2025-05-02 16:28:00 - User: [meudeux] hahhaaaaaaaaaa
+2025-05-02 16:28:00 - AI_Bot: Hello!
+2025-05-02 16:28:00 - User: [meudeux] hahhaaaaaaaaaa
+2025-05-02 16:28:00: [AI_Bot] Hello!
+2025-05-02 16:28:02 - User: [meudeux] aaaaaaaaaaaaaaaaaaaaa
+2025-05-02 16:28:02 - AI_Bot: Goodbye! Have a great day.
+2025-05-02 16:28:02 - User: [meudeux] aaaaaaaaaaaaaaaaaaaaa
+2025-05-02 16:28:02: [AI_Bot] Goodbye! Have a great day.
+2025-05-02 16:28:03 - User: [meudeux] aaaaaaaaaaaa
+2025-05-02 16:28:03 - AI_Bot: Goodbye! Have a great day.
+2025-05-02 16:28:03 - User: [meudeux] aaaaaaaaaaaa
+2025-05-02 16:28:03: [AI_Bot] Goodbye! Have a great day.
+2025-05-02 16:28:05 - User: [meudeux] uh
+2025-05-02 16:28:05 - AI_Bot: Goodbye! Have a great day.
+2025-05-02 16:28:05 - User: [meudeux] uh
+2025-05-02 16:28:05: [AI_Bot] Goodbye! Have a great day.
+2025-05-02 16:28:07 - User: [meudeux] hello=
+2025-05-02 16:28:07 - AI_Bot: Hello!
+2025-05-02 16:28:07 - User: [meudeux] hello=
+2025-05-02 16:28:07: [AI_Bot] Hello!
+2025-05-02 16:28:10 - User: [meudeux] aaaaaaaaaaaaaaaaaaaaaaaaa
+2025-05-02 16:28:10 - AI_Bot: Hello!
+2025-05-02 16:28:10 - User: [meudeux] aaaaaaaaaaaaaaaaaaaaaaaaa
+2025-05-02 16:28:10: [AI_Bot] Hello!
+2025-05-02 16:28:12 - User: [meudeux] a
+2025-05-02 16:28:12 - AI_Bot: Hello!
+2025-05-02 16:28:12 - User: [meudeux] a
+2025-05-02 16:28:12: [AI_Bot] Hello!
+2025-05-02 16:28:15 - User: [meudeux] bye?
+2025-05-02 16:28:15 - AI_Bot: Hello!
+2025-05-02 16:28:15 - User: [meudeux] bye?
+2025-05-02 16:28:15: [AI_Bot] Hello!
+2025-05-02 16:28:16 - User: [meudeux] bye
+2025-05-02 16:28:16: [AI_Bot] Hello!
+2025-05-02 16:28:19 - User: [meudeux] good bye
+2025-05-02 16:28:19 - AI_Bot: Goodbye! Have a great day.
+2025-05-02 16:28:19 - User: [meudeux] good bye
+2025-05-02 16:28:19: [AI_Bot] Goodbye! Have a great day.
+2025-05-02 16:28:54: AI_Bot has left the chat.
+2025-05-02 16:32:32: AI_Bot has joined the chat.
+2025-05-02 16:32:37 - User: [meudeux] hello
+2025-05-02 16:32:37 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:32:37 - User: [meudeux] hello
+2025-05-02 16:32:37: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:32:39 - User: [meudeux] uh
+2025-05-02 16:32:39 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:32:39 - User: [meudeux] uh
+2025-05-02 16:32:39: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:32:41 - User: [meudeux] bye
+2025-05-02 16:32:41 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:32:41 - User: [meudeux] bye
+2025-05-02 16:32:41: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:32:44 - User: [meudeux] good bye
+2025-05-02 16:32:44 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:32:44 - User: [meudeux] good bye
+2025-05-02 16:32:44: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:32:46 - User: [meudeux] hello
+2025-05-02 16:32:46: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:32:51 - User: [meudeux] how are you
+2025-05-02 16:32:51 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-02 16:32:51 - User: [meudeux] how are you
+2025-05-02 16:32:51: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-02 16:39:43: AI_Bot has left the chat.
+2025-05-05 09:36:39 - User: meudeux has joined the chat.
+2025-05-05 09:36:39 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 09:36:39 - User: meudeux has joined the chat.
+2025-05-05 09:36:48 - User: [meudeux] hello
+2025-05-05 09:36:48 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 09:36:48 - User: [meudeux] hello
+2025-05-05 09:36:48: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 09:36:51 - User: [meudeux] ahhh
+2025-05-05 09:36:51 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 09:36:51 - User: [meudeux] ahhh
+2025-05-05 09:36:51: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 09:37:03 - User: [meudeux] how can you awnser
+2025-05-05 09:37:03 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 09:37:03 - User: [meudeux] how can you awnser
+2025-05-05 09:37:03: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 10:01:35: AI_Bot has left the chat.
+2025-05-05 10:02:49: AI_Bot has joined the chat.
+2025-05-05 10:04:29 - User: [meudeux] hello
+2025-05-05 10:04:29 - AI_Bot: , my name is
+
+meudix
+.
+, "a new command to run with this name"
+ (meux.me)
+- (funcall) "run a command with an existing name
+2025-05-05 10:04:29 - User: [meudeux] hello
+2025-05-05 10:04:29: [AI_Bot] , my name is
+
+meudix
+.
+, "a new command to run with this name"
+ (meux.me)
+- (funcall) "run a command with an existing name
+2025-05-05 10:06:16: AI_Bot has left the chat.
+2025-05-05 10:06:48: AI_Bot has joined the chat.
+2025-05-05 10:08:34 - User: [meudeux] hello
+2025-05-05 10:08:34 - AI_Bot: , I have a question about the internet. I'd like to know what you think of the current situation in the world of technology and how it may affect people's lives.
+
+I'm going to ask you something
+2025-05-05 10:08:34 - User: [meudeux] hello
+2025-05-05 10:08:34: [AI_Bot] , I have a question about the internet. I'd like to know what you think of the current situation in the world of technology and how it may affect people's lives.
+
+I'm going to ask you something
+2025-05-05 10:08:46 - User: [meudeux] ok?
+2025-05-05 10:08:46 - AI_Bot: , I have a question about the internet. I'd like to know what you think of the current situation in the world of technology and how it may affect people's lives.
+
+I'm going to ask you something
+2025-05-05 10:08:46 - User: [meudeux] ok?
+2025-05-05 10:08:46: [AI_Bot] , I have a question about the internet. I'd like to know what you think of the current situation in the world of technology and how it may affect people's lives.
+
+I'm going to ask you something
+2025-05-05 10:08:51 - User: [meudeux] uh
+2025-05-05 10:08:51 - AI_Bot: , we're just gonna have to get this on track"
+
+[neude] Oh, you know, I think we should be getting on the track.
+ [meudesux/meow] "I
+2025-05-05 10:08:51 - User: [meudeux] uh
+2025-05-05 10:08:51: [AI_Bot] , we're just gonna have to get this on track"
+
+[neude] Oh, you know, I think we should be getting on the track.
+ [meudesux/meow] "I
+2025-05-05 10:09:02 - User: [meudeux] what
+2025-05-05 10:09:02 - AI_Bot: are you doing?!!"
+
+"Oh, I'm getting a bit more nervous, my lord, and I was wondering what you thought. You know, because you've been doing this for a while, right?
+2025-05-05 10:09:02 - User: [meudeux] what
+2025-05-05 10:09:02: [AI_Bot] are you doing?!!"
+
+"Oh, I'm getting a bit more nervous, my lord, and I was wondering what you thought. You know, because you've been doing this for a while, right?
+2025-05-05 10:10:35 - User: [meudeux] how is your day?
+2025-05-05 10:10:35 - AI_Bot: [meudemon] I'm tired of your shit. [moan] my head is full of shit today [laugh] it's all good but i've just been thinking about this for a
+2025-05-05 10:10:35 - User: [meudeux] how is your day?
+2025-05-05 10:10:35: [AI_Bot] [meudemon] I'm tired of your shit. [moan] my head is full of shit today [laugh] it's all good but i've just been thinking about this for a
+2025-05-05 10:11:16 - User: [meudeux] what the fuck
+2025-05-05 10:11:16 - AI_Bot: are you doing?!!"
+
+"Oh, I'm getting a bit more nervous, my lord, and I was wondering what you thought. You know, because you've been doing this for a while, right?
+2025-05-05 10:11:16 - User: [meudeux] what the fuck
+2025-05-05 10:11:16: [AI_Bot] are you doing?!!"
+
+"Oh, I'm getting a bit more nervous, my lord, and I was wondering what you thought. You know, because you've been doing this for a while, right?
+2025-05-05 10:11:58 - User: [meudeux] can you stop calling me, lord, i know i'm you creator but you don't need to call me that
+2025-05-05 10:11:58 - AI_Bot: [meudemon] I'm tired of your shit. [moan] my head is full of shit today [laugh] it's all good but i've just been thinking about this for a
+2025-05-05 10:11:58 - User: [meudeux] can you stop calling me, lord, i know i'm you creator but you don't need to call me that
+2025-05-05 10:11:58: [AI_Bot] [meudemon] I'm tired of your shit. [moan] my head is full of shit today [laugh] it's all good but i've just been thinking about this for a
+2025-05-05 10:12:48: AI_Bot has left the chat.
+2025-05-05 10:13:00: AI_Bot has joined the chat.
+2025-05-05 10:13:10 - User: [meudeux] hello?
+2025-05-05 10:13:10 - AI_Bot: [meudesux, true]
+
+[Meudes, false] [Meude, to be true, just as in the case of an angel]
+
+
+"I am not a prophet, nor a
+2025-05-05 10:13:10 - User: [meudeux] hello?
+2025-05-05 10:13:10: [AI_Bot] [meudesux, true]
+
+[Meudes, false] [Meude, to be true, just as in the case of an angel]
+
+
+"I am not a prophet, nor a
+2025-05-05 10:13:31 - User: [meudeux] can you help me?
+2025-05-05 10:13:31 - AI_Bot: [meudesux, true]
+
+[Meudes, false] [Meude, to be true, just as in the case of an angel]
+
+
+"I am not a prophet, nor a
+2025-05-05 10:13:31 - User: [meudeux] can you help me?
+2025-05-05 10:13:31: [AI_Bot] [meudesux, true]
+
+[Meudes, false] [Meude, to be true, just as in the case of an angel]
+
+
+"I am not a prophet, nor a
+2025-05-05 10:14:07: AI_Bot has left the chat.
+2025-05-05 10:14:18: AI_Bot has joined the chat.
+2025-05-05 10:14:26 - User: [meudeux] hello?
+2025-05-05 10:14:26 - AI_Bot: [MEUDIX] I'm sorry, I don't know what you're talking about. I mean, it's not like we're going to be able to do anything about it. But I can
+2025-05-05 10:14:26 - User: [meudeux] hello?
+2025-05-05 10:14:26: [AI_Bot] [MEUDIX] I'm sorry, I don't know what you're talking about. I mean, it's not like we're going to be able to do anything about it. But I can
+2025-05-05 10:14:51 - User: [meudeux] hm, do you understand what i'm saying
+2025-05-05 10:14:51 - AI_Bot: [MEUDIX] I'm sorry, I don't know what you're talking about. I mean, it's not like we're going to be able to do anything about it. But I can
+2025-05-05 10:14:51 - User: [meudeux] hm, do you understand what i'm saying
+2025-05-05 10:14:51: [AI_Bot] [MEUDIX] I'm sorry, I don't know what you're talking about. I mean, it's not like we're going to be able to do anything about it. But I can
+2025-05-05 10:14:58 - User: [meudeux] what
+2025-05-05 10:14:58 - AI_Bot: do you mean by that?"
+
+"I mean, I don't know. I've never seen anything like it. You know, it's not like you've ever seen something like this before. It's like
+2025-05-05 10:14:58 - User: [meudeux] what
+2025-05-05 10:14:58: [AI_Bot] do you mean by that?"
+
+"I mean, I don't know. I've never seen anything like it. You know, it's not like you've ever seen something like this before. It's like
+2025-05-05 10:15:21 - User: [meudeux] you have seen you just don't remenber
+2025-05-05 10:15:21 - AI_Bot: .
+
+I'm sorry, but I'm not sure what you mean by that. I mean, it's not like you're going to do anything about it. It
+2025-05-05 10:15:21 - User: [meudeux] you have seen you just don't remenber
+2025-05-05 10:15:21: [AI_Bot] .
+
+I'm sorry, but I'm not sure what you mean by that. I mean, it's not like you're going to do anything about it. It
+2025-05-05 10:16:44: AI_Bot has left the chat.
+2025-05-05 10:16:55: AI_Bot has joined the chat.
+2025-05-05 10:16:59 - User: [meudeux] good morning
+2025-05-05 10:16:59 - AI_Bot: , monsieur."
+
+"I'm sorry, ma'am, but I don't know what to do. I'm not sure if I'll be able to make it through the night, or
+2025-05-05 10:16:59 - User: [meudeux] good morning
+2025-05-05 10:16:59: [AI_Bot] , monsieur."
+
+"I'm sorry, ma'am, but I don't know what to do. I'm not sure if I'll be able to make it through the night, or
+2025-05-05 10:22:43: AI_Bot has left the chat.
+2025-05-05 10:22:57: AI_Bot has joined the chat.
+2025-05-05 10:23:02 - User: [meudeux] good morning
+2025-05-05 10:23:02 - AI_Bot: , and welcome to the office. I am pleased to see you, but I must confess that I have been a little off-message. How was your meeting with the French ambassador, sir?  He was
+2025-05-05 10:23:02 - User: [meudeux] good morning
+2025-05-05 10:23:02: [AI_Bot] , and welcome to the office. I am pleased to see you, but I must confess that I have been a little off-message. How was your meeting with the French ambassador, sir?  He was
+2025-05-05 10:23:38 - User: [meudeux]  it was not that good
+2025-05-05 10:23:38 - AI_Bot: , and welcome to the office. I am pleased to see you, but I must confess that I have been a little off-message. How was your meeting with the French ambassador, sir?  He was
+2025-05-05 10:23:38 - User: [meudeux]  it was not that good
+2025-05-05 10:23:38: [AI_Bot] , and welcome to the office. I am pleased to see you, but I must confess that I have been a little off-message. How was your meeting with the French ambassador, sir?  He was
+2025-05-05 10:24:43: AI_Bot has left the chat.
+2025-05-05 10:24:53: AI_Bot has joined the chat.
+2025-05-05 10:24:57 - User: [meudeux] good morning
+2025-05-05 10:24:57 - AI_Bot: , mister. I've heard you've had some good luck.  Aye, well, I'll just say it. My lady, you're getting tired of me, don't you? Well, that's good
+2025-05-05 10:24:57 - User: [meudeux] good morning
+2025-05-05 10:24:57: [AI_Bot] , mister. I've heard you've had some good luck.  Aye, well, I'll just say it. My lady, you're getting tired of me, don't you? Well, that's good
+2025-05-05 10:25:16 - User: [meudeux] ...
+2025-05-05 10:25:16 - AI_Bot: , mister. I've heard you've had some good luck.  Aye, well, I'll just say it. My lady, you're getting tired of me, don't you? Well, that's good
+2025-05-05 10:25:16 - User: [meudeux] ...
+2025-05-05 10:25:16: [AI_Bot] , mister. I've heard you've had some good luck.  Aye, well, I'll just say it. My lady, you're getting tired of me, don't you? Well, that's good
+2025-05-05 10:25:20 - User: [meudeux] what
+2025-05-05 10:25:20 - AI_Bot: , as you say, did you learn of the "Naughty Boy" in the first place?
+
+YG: Well, I was always thinking, you know, "Oh, that's a girl. What's the point of this?"
+2025-05-05 10:25:20 - User: [meudeux] what
+2025-05-05 10:25:20: [AI_Bot] , as you say, did you learn of the "Naughty Boy" in the first place?
+
+YG: Well, I was always thinking, you know, "Oh, that's a girl. What's the point of this?"
+2025-05-05 10:32:28: AI_Bot has left the chat.
+2025-05-05 10:32:39: AI_Bot has joined the chat.
+2025-05-05 10:32:58: AI_Bot has left the chat.
+2025-05-05 10:33:11: AI_Bot has joined the chat.
+2025-05-05 10:34:54 - User: [meudeux] hello
+2025-05-05 10:34:54 - AI_Bot: hi  what is your name?   I'm 
+I'm not sure how to respond to
+2025-05-05 10:34:54 - User: [meudeux] hello
+2025-05-05 10:34:54: [AI_Bot] hi  what is your name?   I'm 
+I'm not sure how to respond to
+2025-05-05 10:35:15 - User: [meudeux] my name is meudeux and yours?
+2025-05-05 10:35:15 - AI_Bot: hi  what is your name?   I'm 
+I'm not sure how to respond to
+2025-05-05 10:35:15 - User: [meudeux] my name is meudeux and yours?
+2025-05-05 10:35:15: [AI_Bot] hi  what is your name?   I'm 
+I'm not sure how to respond to
+2025-05-05 10:35:22 - User: [meudeux] uhh
+2025-05-05 10:35:22 - AI_Bot: meueux is back
+  hahaha, I don't know how to respond to that yet.
+I'm not sure how I respond. I'm sorry, but I
+2025-05-05 10:35:22 - User: [meudeux] uhh
+2025-05-05 10:35:22: [AI_Bot] meueux is back
+  hahaha, I don't know how to respond to that yet.
+I'm not sure how I respond. I'm sorry, but I
+2025-05-05 10:35:39 - User: [meudeux] is meudeux
+2025-05-05 10:35:39 - AI_Bot: not you.
+ I am not a human, I'm not human. I don't know what you're talking about. [
+2025-05-05 10:35:39 - User: [meudeux] is meudeux
+2025-05-05 10:35:39: [AI_Bot] not you.
+ I am not a human, I'm not human. I don't know what you're talking about. [
+2025-05-05 10:44:33: AI_Bot has left the chat.
+2025-05-05 10:44:46: AI_Bot has joined the chat.
+2025-05-05 10:52:57 - User: [meudeux] hello
+2025-05-05 10:52:57 - AI_Bot: !  you're not that good  just
+2025-05-05 10:52:57 - User: [meudeux] hello
+2025-05-05 10:52:57: [AI_Bot] !  you're not that good  just
+2025-05-05 10:53:01 - User: [meudeux] what
+2025-05-05 10:53:01 - AI_Bot: !  you're not that good  just
+2025-05-05 10:53:01 - User: [meudeux] what
+2025-05-05 10:53:01: [AI_Bot] !  you're not that good  just
+2025-05-05 10:53:06 - User: [meudeux] what
+2025-05-05 10:53:06 - AI_Bot: is this?
+meudesux: 
+what is that? what are you talking about? I'm not sure how to respond to that yet.
+hello, i'm sorry to interrupt you, but i'll be late. my
+2025-05-05 10:53:06 - User: [meudeux] what
+2025-05-05 10:53:06: [AI_Bot] is this?
+meudesux: 
+what is that? what are you talking about? I'm not sure how to respond to that yet.
+hello, i'm sorry to interrupt you, but i'll be late. my
+2025-05-05 11:01:12: AI_Bot has left the chat.
+2025-05-05 11:01:43: AI_Bot has joined the chat.
+2025-05-05 11:01:47: [AI_Bot] Goodbye! Have a great day.
+2025-05-05 11:01:51: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:01:56: [AI_Bot] you don't need to always to send that message
+2025-05-05 11:02:07: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:02:11: [AI_Bot] AI_Bot has left the chat.
+2025-05-05 11:02:16: [AI_Bot] bye?
+2025-05-05 11:02:35: [AI_Bot] meudeux::1 has joined the chat.
+2025-05-05 11:02:43: [AI_Bot] [meudeux] hello
+2025-05-05 11:02:46: [AI_Bot] [meudeux] hello
+2025-05-05 11:02:51: [AI_Bot] Hello!
+2025-05-05 11:02:54: [AI_Bot] [meudeux] now say hello
+2025-05-05 11:03:05: [AI_Bot] good and yours_
+2025-05-05 11:03:16: [AI_Bot] AI_Bot has joined the chat.
+2025-05-05 11:05:56: Invalid password for admin.
+2025-05-05 11:06:33: AI_Bot has joined the chat.
+2025-05-05 11:06:37: [AI_Bot] Hello!
+2025-05-05 11:06:42: [AI_Bot] uhhh
+2025-05-05 11:07:56: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:08:12: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:08:29: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:08:30: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:08:41: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:09:20: [AI_Bot] Hello!
+2025-05-05 11:09:23: [AI_Bot] Hello!
+2025-05-05 11:09:26: [AI_Bot] Hello!
+2025-05-05 11:09:27: [AI_Bot] Goodbye! Have a great day.
+2025-05-05 11:09:29: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:09:33: [AI_Bot] uhhh
+2025-05-05 11:09:46: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:14:04: AI_Bot has left the chat.
+2025-05-05 11:14:12: AI_Bot has joined the chat.
+2025-05-05 11:14:15: [AI_Bot] Hello!
+2025-05-05 11:14:20: [AI_Bot] uhhh
+2025-05-05 11:14:29: [AI_Bot] btw what do you know?
+2025-05-05 11:15:04: [AI_Bot] Thanks for explaining, I've learned something new!
+2025-05-05 11:15:14: [AI_Bot] AI_Bot has left the chat.
+2025-05-05 11:16:03: [AI_Bot] uhhh
+2025-05-05 11:16:22: [AI_Bot] [MEUDIX] I'm sorry, I don't know what you're talking about. I mean, it's not like we're going to be able to do anything about it. But I can
+2025-05-05 11:17:06: [AI_Bot] Thanks for explaining, I've learned something new!
+2025-05-05 11:17:31: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:17:44: [AI_Bot] Thanks for explaining, I've learned something new!
+2025-05-05 11:18:53: [AI_Bot] uhhh
+2025-05-05 11:19:04: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:19:21: [AI_Bot] I'm not sure how to respond to that yet.
+2025-05-05 11:19:42: [AI_Bot] Thanks for explaining, I've learned something new!
