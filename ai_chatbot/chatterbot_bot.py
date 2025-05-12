@@ -6,10 +6,14 @@ class ChatterBotWrapper:
         from chatterbot.logic import BestMatch
         from chatterbot.trainers import ListTrainer
         from chatterbot import ChatBot
+        import os
+
+        db_path = os.path.join(os.path.dirname(__file__), 'chatterbot_db.sqlite3')
 
         self.bot = ChatBot(
             name,
             storage_adapter='chatterbot.storage.SQLStorageAdapter',
+            database_uri=f'sqlite:///{db_path}',
             logic_adapters=[
                 {
                     'import_path': 'chatterbot.logic.BestMatch',
@@ -48,23 +52,28 @@ class ChatterBotWrapper:
         farewells = ["bye", "goodbye", "see you", "farewell"]
 
         if any(greet in message.lower() for greet in greetings):
-            return "Hello!"
-        if any(farewell in message.lower() for farewell in farewells):
-            return "Goodbye! Have a great day."
+            base_response = "Hello!"
+        elif any(farewell in message.lower() for farewell in farewells):
+            base_response = "Goodbye! Have a great day."
+        else:
+            # If message looks like an explanation or teaching, learn from it
+            if any(phrase in message.lower() for phrase in ["i mean", "let me explain", "what i mean", "to clarify", "for example"]):
+                # Teach the bot this message as a response to the previous user input if available
+                # This requires storing last user input and pairing it with this explanation
+                if hasattr(self, 'last_user_message') and self.last_user_message:
+                    self.trainer.train([self.last_user_message, message])
+                    self.last_user_message = None
+                    return "Thanks for explaining, I've learned something new!"
+            
+            # Store current message as last user message for possible learning
+            self.last_user_message = message
 
-        # If message looks like an explanation or teaching, learn from it
-        if any(phrase in message.lower() for phrase in ["i mean", "let me explain", "what i mean", "to clarify", "for example"]):
-            # Teach the bot this message as a response to the previous user input if available
-            # This requires storing last user input and pairing it with this explanation
-            if hasattr(self, 'last_user_message') and self.last_user_message:
-                self.trainer.train([self.last_user_message, message])
-                self.last_user_message = None
-                return "Thanks for explaining, I've learned something new!"
-        
-        # Store current message as last user message for possible learning
-        self.last_user_message = message
+            base_response = str(self.bot.get_response(message))
 
-        return str(self.bot.get_response(message))
+        # Add joker personality style
+        personality_response = f"{base_response} Why so serious? 😈"
+
+        return personality_response
 
 if __name__ == "__main__":
     chatbot = ChatterBotWrapper()

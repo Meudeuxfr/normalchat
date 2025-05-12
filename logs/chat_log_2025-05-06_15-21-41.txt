@@ -1,0 +1,10 @@
+2025-05-06 15:21:50 - Server: aaa has joined the chat.
+2025-05-06 15:21:56 - aaa: lool
+2025-05-06 15:22:03 - Server: aaaa has joined the chat.
+2025-05-06 15:22:08 - aaaa: aaa
+2025-05-06 15:22:09 - aaaa: aa
+2025-05-06 15:22:09 - aaaa: aa
+2025-05-06 15:22:10 - aaaa: aa
+2025-05-06 15:23:00 - aaa: aaaasadwead
+2025-05-06 15:23:01 - aaa: ede
+2025-05-06 15:28:16 - Server: aaa has left the chat.

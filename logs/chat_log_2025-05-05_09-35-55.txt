@@ -222,3 +222,28 @@ hello, i'm sorry to interrupt you, but i'll be late. my
 2025-05-05 11:19:21 - AI_Bot: I'm not sure how to respond to that yet.
 2025-05-05 11:19:42 - meudeux: i mean you don't need to always anwser?
 2025-05-05 11:19:42 - AI_Bot: Thanks for explaining, I've learned something new!
+2025-05-05 12:00:25 - meudeux: hello
+2025-05-05 12:00:25 - AI_Bot: Hello!
+2025-05-05 12:00:30 - meudeux: how are you
+2025-05-05 12:00:30 - AI_Bot: uhhh
+2025-05-05 12:02:06 - Server: AI_Bot has left the chat.
+2025-05-05 12:02:16 - Server: AI_Bot has joined the chat.
+2025-05-05 12:02:21 - meudeux: hello
+2025-05-05 12:02:21 - AI_Bot: Hello!
+2025-05-05 12:02:26 - meudeux: good mornig
+2025-05-05 12:02:26 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:02:31 - meudeux: how are you?
+2025-05-05 12:02:31 - AI_Bot: uhhh
+2025-05-05 12:04:13 - meudeux: to clarify do not send uhhh when someone ask how are you? 
+2025-05-05 12:04:13 - AI_Bot: Thanks for explaining, I've learned something new!
+2025-05-05 12:04:41 - meudeux: exit
+2025-05-05 12:04:42 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:04:44 - meudeux: hmm
+2025-05-05 12:04:44 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:04:46 - meudeux: uhhh
+2025-05-05 12:04:46 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:04:47 - meudeux: ola
+2025-05-05 12:04:47 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:04:49 - meudeux: adeus
+2025-05-05 12:04:49 - AI_Bot: I'm not sure how to respond to that yet.
+2025-05-05 12:04:53 - Server: AI_Bot has left the chat.

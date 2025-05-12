@@ -1,0 +1,5 @@
+2025-05-08 12:02:58 - Server: a has joined the chat.
+2025-05-08 12:03:01 - Server: aa has joined the chat.
+2025-05-08 12:03:23 - aa: /create_channel
+2025-05-08 12:06:20 - Server: a has left the chat.
+2025-05-08 12:06:20 - Server: aa has left the chat.

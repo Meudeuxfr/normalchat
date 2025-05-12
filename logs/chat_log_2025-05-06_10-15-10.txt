@@ -1,0 +1,12 @@
+2025-05-06 10:15:18 - Server: kin has joined the chat.
+2025-05-06 10:15:28 - kin: hello
+2025-05-06 10:15:29 - kin: @joker a
+2025-05-06 10:15:35 - kin: muah  ha
+2025-05-06 10:15:39 - kin: cool
+2025-05-06 10:15:41 - Server: kin has left the chat.
+2025-05-06 10:49:55 - Server: WISi1F9YC8JqTqoba9lt0jnl has joined the chat.
+2025-05-06 10:50:08 - Server: uNrRUR4TC5j4UbNiSJ7SENm7sA== has joined the chat.
+2025-05-06 10:50:12 - WISi1F9YC8JqTqoba9lt0jnl: yo
+2025-05-06 10:50:16 - uNrRUR4TC5j4UbNiSJ7SENm7sA==: aaa
+2025-05-06 11:02:56 - Server: uNrRUR4TC5j4UbNiSJ7SENm7sA== has left the chat.
+2025-05-06 11:02:57 - Server: WISi1F9YC8JqTqoba9lt0jnl has left the chat.

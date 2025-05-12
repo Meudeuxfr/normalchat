@@ -1,0 +1,11 @@
+2025-05-08 12:10:12 - Server: aa has joined the chat.
+2025-05-08 12:10:19 - aa: /create_group ss aa
+2025-05-08 12:23:09 - Server: aa has left the chat.
+2025-05-08 12:23:19 - Server: aa has joined the chat.
+2025-05-08 12:23:33 - aa: /create_group hello
+2025-05-08 12:23:41 - aa: /join_group hello
+2025-05-08 12:27:11 - Server: aa has left the chat.
+2025-05-08 12:27:23 - Server: aa has joined the chat.
+2025-05-08 12:27:32 - aa: /create_group hello
+2025-05-08 12:27:34 - aa: /get_groups
+2025-05-08 12:27:47 - Server: aa has left the chat.

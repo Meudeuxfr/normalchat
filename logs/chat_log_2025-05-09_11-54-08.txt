@@ -1,0 +1,8 @@
+2025-05-09 11:54:13 - Server: aa has joined the chat.
+2025-05-09 11:58:03 - aa: /invite_to_group aa aa
+2025-05-09 11:58:06 - aa: /get_invites
+2025-05-09 12:02:31 - Server: aa has left the chat.
+2025-05-09 12:05:58 - Server:  a has joined the chat.
+2025-05-09 12:06:00 - Server:  a has left the chat.
+2025-05-09 12:06:06 - Server: aa has joined the chat.
+2025-05-09 12:12:33 - Server: aa has left the chat.
