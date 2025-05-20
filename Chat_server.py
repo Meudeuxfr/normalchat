@@ -3,12 +3,16 @@ import threading
 import datetime
 import os
 import sqlite3
+import shutil
+import hashlib
 
 # ----------- config -----------
 Host = '0.0.0.0'
 Port = 5555
 START_TIME = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 LOG_FILE = f"./logs/chat_log_{START_TIME}.txt"
+SHARED_FILES_DIR = './shared_files'
+os.makedirs(SHARED_FILES_DIR, exist_ok=True)
 #------------------------------
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,12 +23,31 @@ import uuid
 
 clients = {}
 usernames = {}
-user_statuses = {}  # New dictionary to track user statuses (Online/Away)
-channels = {}  # Initialize channels dictionary
+user_statuses = {} 
+channels = {} 
+
+pending_invites = {}
 
 # Initialize SQLite database connection
 db_connection = sqlite3.connect('db.sqlite3', check_same_thread=False)
 db_cursor = db_connection.cursor()
+
+# --- Add users and messages tables ---
+db_cursor.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL
+);
+''')
+db_cursor.execute('''
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    timestamp TEXT,
+    content TEXT
+);
+''')
+db_connection.commit()
 
 # Update database schema to include username when saving groups
 db_cursor.execute('''
@@ -57,6 +80,8 @@ def load_groups():
         groups[group_name] = members
         print(f"Loaded group: {group_name} with members: {members}")  # Debug log
     print("Finished loading groups.")  # Debug log
+    # Debug log to print all loaded groups and their members
+    print("[DEBUG] Groups loaded into memory:", groups)
 
 load_groups()
 
@@ -112,6 +137,9 @@ def log_message(username, message):
     entry = f"{timestamp} - {username}: {message}\n"
     with open(LOG_FILE, "a", encoding="utf-8") as log_file:
         log_file.write(entry)
+    # Save to database
+    db_cursor.execute('INSERT INTO messages (username, timestamp, content) VALUES (?, ?, ?)', (username, timestamp, message))
+    db_connection.commit()
 
 def broadcast(message, sender_socket):
     print(f"Broadcasting message: {message}")  # Debug log
@@ -170,25 +198,62 @@ def broadcast_typing(username, sender_socket):
         remove_disconnected_client(dc)
 
 def handle_client(client_socket, address):
+    is_admin = False  # Always initialize is_admin
     try:
-        credentials = client_socket.recv(1024).decode('utf-8')
-        ADMIN_USERNAME = "meudeux"
-        ADMIN_PASSWORD = "onlymeudeuxknows123"
-
-        if "::" in credentials:
-            username, password = credentials.split("::", 1)
+        credentials = client_socket.recv(4096).decode('utf-8')
+        if credentials.startswith('/register '):
+            _, reg_username, reg_password = credentials.strip().split(' ', 2)
+            db_cursor.execute('SELECT username FROM users WHERE username = ?', (reg_username,))
+            if db_cursor.fetchone():
+                client_socket.send("__register_failed__:Username already exists".encode('utf-8'))
+                client_socket.close()
+                return
+            password_hash = hash_password(reg_password)
+            db_cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', (reg_username, password_hash))
+            db_connection.commit()
+            client_socket.send("__register_success__".encode('utf-8'))
+            client_socket.close()
+            return
+        # Login logic
+        if '::' in credentials:
+            username, password = credentials.split('::', 1)
         else:
             username = credentials
             password = None
-
-        if username.split("::")[0] == ADMIN_USERNAME:
-            if password != ADMIN_PASSWORD:
-                client_socket.send("Invalid password for admin.".encode('utf-8'))
+        # Check user in users table
+        db_cursor.execute('SELECT password_hash FROM users WHERE username = ?', (username,))
+        row = db_cursor.fetchone()
+        # Debug: Print all users and their password hashes
+        db_cursor.execute('SELECT username, password_hash FROM users')
+        all_users = db_cursor.fetchall()
+        print("[DEBUG] Users in DB:")
+        for u, ph in all_users:
+            print(f"  - {u}: {ph}")
+        print(f"[DEBUG] Login attempt: username='{username}', password='{password}'")
+        if row:
+            print(f"[DEBUG] DB password hash for '{username}': {row[0]}")
+            if not password or not verify_password(password, row[0]):
+                print(f"[DEBUG] Password check failed for '{username}'.")
+                client_socket.send("Password not correct".encode('utf-8'))
                 client_socket.close()
                 return
-            is_admin = True
+            else:
+                print(f"[DEBUG] Password check succeeded for '{username}'.")
         else:
-            is_admin = False
+            # Fallback to old admin logic if not in users table
+            ADMIN_USERNAME = "meudeux"
+            ADMIN_PASSWORD = "onlymeudeuxknows123"
+            if username == ADMIN_USERNAME:
+                if password != ADMIN_PASSWORD:
+                    client_socket.send("Password not correct".encode('utf-8'))
+                    client_socket.close()
+                    return
+                is_admin = True
+            else:
+                client_socket.send("User does not exist".encode('utf-8'))
+                client_socket.close()
+                return
+                is_admin = False
 
         username_only = username.split("::")[0]
         usernames[client_socket] = username_only
@@ -199,26 +264,44 @@ def handle_client(client_socket, address):
         broadcast(f"{username_only} has joined the chat.".encode('utf-8'), client_socket)
         send_user_list()
 
+        # New: Buffer for receiving file data
+        file_receiving = False
+        file_info = {}
+        file_write_handle = None  # File handle for writing incoming file
+        received_file_bytes = 0   # Track bytes written
+        file_buffer = b''  # Initialize file_buffer to avoid NameError
+        file_write_progress = 0  # For debug progress output
+        file_write_lock = threading.Lock()  # For thread safety
+        file_write_thread = None
+
+        def file_write_worker():
+            nonlocal received_file_bytes, file_write_handle, file_info, file_write_progress, file_buffer
+            while file_receiving and file_write_handle:
+                with file_write_lock:
+                    if file_buffer:
+                        file_write_handle.write(file_buffer)
+                        received_file_bytes += len(file_buffer)
+                        file_buffer_len = len(file_buffer)
+                        file_buffer = b''
+                        # Print progress every 1MB or at the end
+                        if received_file_bytes - file_write_progress >= 1024*1024 or received_file_bytes == file_info.get('size', 0):
+                            print(f"[DEBUG] Background write: {received_file_bytes}/{file_info.get('size', 0)} bytes written.")
+                            file_write_progress = received_file_bytes
+                import time
+                time.sleep(0.1)  # Sleep briefly to avoid busy loop
+
         # Send message history to client after connection
         try:
             import time
             time.sleep(0.5)  # Small delay to allow client to be ready
-            print(f"Sending message history from log file: {LOG_FILE}")
-            with open(LOG_FILE, "r", encoding="utf-8") as log_file:
-                lines = log_file.readlines()
-                # Send last 100 lines or all if less
-                history_lines = lines[-100:] if len(lines) > 100 else lines
-                print(f"Number of history lines to send: {len(history_lines)}")
-                history_message = "__history__:" + "".join(history_lines)
-                # Send entire history message at once
-                client_socket.send(history_message.encode('utf-8'))
-                # Send delimiter to indicate end of history message
-                client_socket.send("__history_end__".encode('utf-8'))
-                import time
-                time.sleep(0.1)  # Small delay to flush send buffer
-                print("Finished sending message history")
+            # Send last 50 messages from DB
+            db_cursor.execute('SELECT username, timestamp, content FROM messages ORDER BY id DESC LIMIT 50')
+            rows = db_cursor.fetchall()[::-1]  # Reverse to send oldest first
+            for uname, ts, content in rows:
+                client_socket.send(f"__history__:[{ts}] {uname}: {content}\n".encode('utf-8'))
+            client_socket.send("__history_end__\n".encode('utf-8'))
         except Exception as e:
-            print(f"Error sending message history: {e}")
+            print(f"[ERROR] Failed to send message history: {e}")
 
         if is_admin:
             client_socket.send("__admin__".encode('utf-8'))
@@ -232,9 +315,154 @@ def handle_client(client_socket, address):
 
     while True:
         try:
-            msg = client_socket.recv(1024).decode('utf-8')
+            # If receiving a file, read raw bytes until done
+            if file_receiving:
+                try:
+                    chunk = client_socket.recv(min(4096, file_info['size'] - received_file_bytes))
+                    if not chunk:
+                        print(f"[ERROR] Connection closed by client during file upload. Received {received_file_bytes}/{file_info['size']} bytes.")
+                        try:
+                            client_socket.send(f"File upload failed: connection closed before complete file was received.".encode('utf-8'))
+                        except Exception as send_err:
+                            print(f"[ERROR] Could not send error to client: {send_err}")
+                        file_receiving = False
+                        continue
+
+                    with file_write_lock:
+                        file_buffer += chunk
+
+                    print(f"[DEBUG] Received chunk: {len(chunk)} bytes | Total received: {received_file_bytes + len(file_buffer)}/{file_info['size']} bytes (buffered)")
+
+                    if received_file_bytes + len(file_buffer) >= file_info['size']:
+                        file_receiving = False
+                        if file_write_thread:
+                            file_write_thread.join(timeout=2)
+                        print(f"[DEBUG] File transfer complete for: {file_info['filename']}")
+                        try:
+                            client_socket.send(f"File '{file_info['filename']}' uploaded successfully.".encode('utf-8'))
+                        except Exception as send_err:
+                            print(f"[ERROR] Could not send upload success to client: {send_err}")
+                except Exception as e:
+                    print(f"[ERROR] Exception during file receiving: {e}")
+                    try:
+                        client_socket.send(f"Error during file upload: {e}".encode('utf-8'))
+                    except Exception as send_err:
+                        print(f"[ERROR] Could not send error to client: {send_err}")
+                    file_receiving = False
+                    continue
+            else:
+                # If we have leftover buffer from file transfer, use it
+                if file_buffer:
+                    try:
+                        msg = file_buffer.decode('utf-8')
+                        print(f"[DEBUG] Decoded leftover buffer: {msg}")
+                        file_buffer = b''
+                    except Exception as e:
+                        print(f"[ERROR] Error decoding buffered data: {e}")
+                        # Instead of breaking, just clear buffer and continue
+                        file_buffer = b''
+                        continue
+                else:
+                    try:
+                        msg = client_socket.recv(4096).decode('utf-8')
+                    except OSError as e:
+                        if hasattr(e, 'winerror') and e.winerror in (10038, 10054, 10053):
+                            print(f"[ERROR] Socket error during recv: {e}. Cleaning up client.")
+                            break
+                        else:
+                            print(f"[ERROR] Exception during recv: {e}")
+                            continue
             if not msg:
+                print(f"[DEBUG] Empty message received, breaking loop for {usernames.get(client_socket, address)}")
                 break
+            # Always strip whitespace from received message before parsing
+            msg = msg.strip()
+            print(f"[DEBUG] Received command: {msg}")  # Log the received command
+            # --- File/image sharing support ---
+            if msg.startswith("/send_file "):
+                try:
+                    print(f"[DEBUG] Raw command received (repr): {repr(msg)}")
+                    _, filename, filesize_str = msg.split(" ", 2)
+                    filename = filename.strip()
+                    filesize = int(filesize_str)
+                    print(f"[DEBUG] Received file transfer request: filename={filename}, size={filesize}")
+                    # Prepare to receive file from client and save to shared_files
+                    ack = f"ACK:{filename}\n".encode('utf-8')
+                    client_socket.sendall(ack)
+                    print(f"[DEBUG] ACK sent for file: {filename}")
+                    # Receive file data from client
+                    save_path = os.path.join(SHARED_FILES_DIR, filename)
+                    received_bytes = 0
+                    with open(save_path, 'wb') as f:
+                        while received_bytes < filesize:
+                            chunk = client_socket.recv(min(4096, filesize - received_bytes))
+                            print(f"[DEBUG] Raw file chunk received (len={len(chunk)}): {repr(chunk[:32])} ...")
+                            if not chunk:
+                                print(f"[ERROR] Connection closed by client during upload. Received {received_bytes}/{filesize} bytes.")
+                                break
+                            f.write(chunk)
+                            received_bytes += len(chunk)
+                            print(f"[DEBUG] Received {received_bytes}/{filesize} bytes...")
+                    if received_bytes == filesize:
+                        print(f"[DEBUG] File upload complete: {filename}")
+                        try:
+                            client_socket.send(f"File '{filename}' uploaded successfully.".encode('utf-8'))
+                        except Exception as send_err:
+                            print(f"[ERROR] Could not send upload success to client: {send_err}")
+                    else:
+                        print(f"[ERROR] File upload incomplete: {received_bytes}/{filesize} bytes.")
+                        try:
+                            client_socket.send(f"File upload incomplete: {received_bytes}/{filesize} bytes.".encode('utf-8'))
+                        except Exception as send_err:
+                            print(f"[ERROR] Could not send upload error to client: {send_err}")
+                except Exception as e:
+                    try:
+                        client_socket.send(f"Failed to initiate file transfer: {e}".encode('utf-8'))
+                    except Exception as send_err:
+                        print(f"[ERROR] Could not send error to client: {send_err}")
+                    print(f"[ERROR] Failed to initiate file transfer: {e}")
+                continue
+            if msg.startswith("/get_file "):
+                try:
+                    import time
+                    _, filename = msg.split(" ", 1)
+                    file_path = os.path.join(SHARED_FILES_DIR, filename)
+                    if os.path.exists(file_path):
+                        # 1. Send ACK
+                        ack = f"ACK:{filename}\n".encode('utf-8')
+                        client_socket.sendall(ack)
+                        print(f"[DEBUG] ACK sent for file: {filename}")
+                        time.sleep(0.1)  # Optional: ensure client is ready
+                        # 2. Send file start header
+                        with open(file_path, 'rb') as f:
+                            file_data = f.read()
+                        file_header = f"__file_start__:{filename}:{len(file_data)}\n".encode('utf-8')
+                        client_socket.sendall(file_header)
+                        print(f"[DEBUG] Sent file header for: {filename}")
+                        # 3. Send file content
+                        client_socket.sendall(file_data)
+                        print(f"[DEBUG] Sent file data: {len(file_data)} bytes")
+                        # 4. Send file end marker
+                        file_end = f"__file_end__:{filename}\n".encode('utf-8')
+                        client_socket.sendall(file_end)
+                        print(f"[DEBUG] Sent file end marker for: {filename}")
+                    else:
+                        client_socket.send(f"File '{filename}' not found.".encode('utf-8'))
+                except Exception as e:
+                    try:
+                        client_socket.send(f"Error sending file: {e}".encode('utf-8'))
+                    except Exception as send_err:
+                        print(f"[ERROR] Could not send error to client: {send_err}")
+                continue
+            if msg == "/list_files":
+                try:
+                    files = os.listdir(SHARED_FILES_DIR)
+                    files = [f for f in files if os.path.isfile(os.path.join(SHARED_FILES_DIR, f))]
+                    file_list_str = "__file_list__:" + ",".join(files)
+                    client_socket.send(file_list_str.encode('utf-8'))
+                except Exception as e:
+                    client_socket.send(f"Error listing files: {e}".encode('utf-8'))
+                continue
             if msg.startswith("__typing__:") or msg == "__typing_stopped__":
                 if msg.startswith("__typing__:"):
                     typing_user = msg.split(":", 1)[1]
@@ -355,16 +583,81 @@ def handle_client(client_socket, address):
             elif msg.startswith("/get_group_info "):
                 try:
                     _, group_name = msg.split(" ", 1)
+                    print(f"[DEBUG] Received request for group info: {group_name}")  # Debug log
                     if group_name in groups:
+                        print(f"[DEBUG] Group '{group_name}' found. Members: {groups[group_name]}")  # Log group details
                         members = groups[group_name]
                         creator = members[0] if members else ""
                         members_str = ",".join(members)
                         response = f"__group_info__:{group_name}:{creator}:{members_str}"
+                        print(f"[DEBUG] Sending group info response: {response}")  # Debug log
                         client_socket.send(response.encode('utf-8'))
+                    else:
+                        print(f"[DEBUG] Group '{group_name}' not found in groups dictionary.")  # Log missing group
+                        print(f"[ERROR] Group '{group_name}' does not exist.")  # Error log
+                        client_socket.send(f"Group '{group_name}' does not exist.".encode('utf-8'))
+                except Exception as e:
+                    print(f"[ERROR] Exception while fetching group info: {e}")  # Error log
+                    client_socket.send(f"Error fetching group info: {e}".encode('utf-8'))
+            elif msg.startswith("/invite_to_group "):
+                try:
+                    _, group_name, user_to_invite = msg.split(" ", 2)
+                    inviter = usernames[client_socket]
+                    if group_name in groups:
+                        if user_to_invite not in groups[group_name]:
+                            # Add invite to pending_invites
+                            if user_to_invite not in pending_invites:
+                                pending_invites[user_to_invite] = []
+                            if group_name not in pending_invites[user_to_invite]:
+                                pending_invites[user_to_invite].append(group_name)
+                                client_socket.send(f"Invite sent to {user_to_invite} for group '{group_name}'.".encode('utf-8'))
+                            else:
+                                client_socket.send(f"User '{user_to_invite}' already has a pending invite to '{group_name}'.".encode('utf-8'))
+                        else:
+                            client_socket.send(f"User '{user_to_invite}' is already in group '{group_name}'.".encode('utf-8'))
                     else:
                         client_socket.send(f"Group '{group_name}' does not exist.".encode('utf-8'))
                 except Exception as e:
-                    client_socket.send(f"Error fetching group info: {e}".encode('utf-8'))
+                    client_socket.send(f"Invalid invite format. Use: /invite_to_group group_name username".encode('utf-8'))
+            elif msg.startswith("/get_invites"):
+                try:
+                    user = usernames[client_socket]
+                    invites = pending_invites.get(user, [])
+                    client_socket.send(f"__invites__:{','.join(invites)}".encode('utf-8'))
+                except Exception as e:
+                    client_socket.send(f"__invites__:".encode('utf-8'))
+            elif msg.startswith("/accept_invite "):
+                try:
+                    _, group_name = msg.split(" ", 1)
+                    user = usernames[client_socket]
+                    if user in pending_invites and group_name in pending_invites[user]:
+                        pending_invites[user].remove(group_name)
+                        if group_name in groups and user not in groups[group_name]:
+                            groups[group_name].append(user)
+                            save_group_member(group_name, user)
+                            client_socket.send(f"You have joined the group: {group_name}".encode('utf-8'))
+                        else:
+                            client_socket.send(f"Group '{group_name}' does not exist or you are already a member.".encode('utf-8'))
+                    else:
+                        client_socket.send(f"No pending invite for group '{group_name}'.".encode('utf-8'))
+                except Exception as e:
+                    client_socket.send(f"Failed to accept invite.".encode('utf-8'))
+            elif msg.startswith("/group_msg "):
+                try:
+                    _, group_name, group_msg = msg.split(" ", 2)
+                    sender = usernames[client_socket]
+                    if group_name in groups and sender in groups[group_name]:
+                        full_msg = f"[Group msg] {group_name} {sender}: {group_msg}"
+                        for member in groups[group_name]:
+                            if member in clients and clients[member] != client_socket:
+                                clients[member].send(full_msg.encode('utf-8'))
+                        # Optionally, echo the message back to the sender's group chat window
+                        client_socket.send(full_msg.encode('utf-8'))
+                        log_message(sender, f"Group {group_name}: {group_msg}")
+                    else:
+                        client_socket.send(f"You are not a member of group '{group_name}'.".encode('utf-8'))
+                except Exception as e:
+                    client_socket.send(f"Invalid group message format. Use: /group_msg group_name message".encode('utf-8'))
             else:
                 # Check if message is an edit or delete command
                 if msg.startswith("/edit "):
@@ -416,8 +709,16 @@ def handle_client(client_socket, address):
                     broadcast_msg = f"[{usernames[client_socket]}] {msg}||{message_id}"
                     broadcast(broadcast_msg.encode('utf-8'), client_socket)
         except Exception as e:
-            print(f"Error receiving message from {usernames.get(client_socket, 'Unknown')}: {e}")
-            break
+            print(f"[ERROR] Unexpected exception in main handler loop: {e}")
+            import traceback
+            traceback.print_exc()
+            # Optionally, send error to client for debugging
+            try:
+                client_socket.send(f"[SERVER ERROR] {e}".encode('utf-8'))
+            except:
+                pass
+            # Do not break; continue to next loop iteration
+            continue
 
     username = usernames.get(client_socket, "Unknown")
     print(f"[DISCONNECTED] {username} disconnected")
@@ -433,6 +734,12 @@ def handle_client(client_socket, address):
         del usernames[client_socket]
     if username in user_statuses:
         del user_statuses[username]
+
+def hash_password(password):
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+def verify_password(password, password_hash):
+    return hash_password(password) == password_hash
 
 print("[STARTING] Server is running...")
 while True:
