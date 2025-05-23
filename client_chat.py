@@ -964,13 +964,6 @@ def show_main_chat_ui():
 
     cached_group_info = {}
 
-    # --- estado do download de ficheiro ---
-    file_download_buffer = b''
-    file_download_header_parsed = False
-    file_download_filename = None
-    file_download_expected_size = 0
-    file_download_bytes = b''
-
     # Synchronization primitives for file transfer handshake
     file_transfer_event = threading.Event()
     file_transfer_ack = None
@@ -1083,10 +1076,6 @@ def show_main_chat_ui():
     def download_file_direct(filename, file_window):
         def _download():
             global file_download_in_progress
-            # Reset buffers and flags before initiating download
-            global file_download_buffer, file_download_bytes, file_download_header_parsed
-            file_download_buffer = bytearray()
-            file_download_bytes = b''
             file_download_header_parsed = False
             file_download_event.clear()
             file_download_request = filename
@@ -1098,8 +1087,8 @@ def show_main_chat_ui():
                 save = filedialog.asksaveasfilename(initialfile=filename)
                 if save:
                     with open(save, "wb") as f:
-                        f.write(file_download_bytes)
-                        print(f" saved {len(file_download_bytes)} bytes")  # Corrected debug print statement
+                        f.write(bytes(file_download_buffer))
+                        print(f" saved {len(file_download_buffer)} bytes")  # Corrected debug print statement
                     root.after(0, lambda:
                         tk.messagebox.showinfo("Sucesso", f"'{filename}' guardado."))
             else:
@@ -1146,7 +1135,7 @@ def show_main_chat_ui():
         global file_download_event
         nonlocal cached_group_info  # Fix scoping for group info cache
         global file_download_in_progress, file_download_request, file_download_event, file_download_result, file_download_error
-        global file_download_buffer, file_download_header_parsed, file_download_filename, file_download_expected_size, file_download_bytes
+        global file_download_buffer, file_download_header_parsed, file_download_filename, file_download_expected_size
         print("receive_messages thread started")  # Debug print
         history_buffer = ""
         receiving_history = False
@@ -1176,64 +1165,48 @@ def show_main_chat_ui():
                 # Agora sim, entra no state‐machine de download
                 if file_download_in_progress and file_download_request:
                     try:
-                        # Append received data to buffer
-                        file_download_buffer += data
-                        print(f"[DEBUG] Appended data to buffer. Buffer size: {len(file_download_buffer)} bytes")
-
-                        # Parse header if not already done
+                        # Append received data directly to file_download_buffer
                         if not file_download_header_parsed:
-                            header_end = file_download_buffer.find(b'\n')
+                            # Parse header if not already done
+                            header_end = data.find(b'\n')
                             if header_end != -1:
-                                header_line = file_download_buffer[:header_end].decode('utf-8', errors='replace')
-                                print(f"[DEBUG] Header line: {header_line}")
+                                header_line = data[:header_end].decode('utf-8', errors='replace')
                                 if header_line.startswith("__file_start__:"):
                                     _, fname, fsize = header_line.strip().split(":", 2)
                                     file_download_filename = fname
                                     file_download_expected_size = int(fsize)
                                     file_download_header_parsed = True
-                                    file_download_buffer = file_download_buffer[header_end + 1:]
-                                    print(f"[DEBUG] Parsed file header: {file_download_filename}, {file_download_expected_size} bytes")
+                                    file_download_buffer.extend(data[header_end + 1:])
                                 else:
-                                    raise ValueError(f"Unexpected header format: {header_line}")
-
-                        # Process file data
-                        if file_download_header_parsed:
-                            bytes_needed = file_download_expected_size - len(file_download_bytes)
-                            print(f"[DEBUG] Bytes needed: {bytes_needed}, Buffer size: {len(file_download_buffer)}")
-
-                            if len(file_download_buffer) >= bytes_needed:
-                                file_download_bytes += file_download_buffer[:bytes_needed]
-                                file_download_buffer = file_download_buffer[bytes_needed:]
-                                print(f"[DEBUG] File download complete: {file_download_filename}")
-
-                                # Save file to disk
-                                downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
-                                os.makedirs(downloads_path, exist_ok=True)
-                                save_path = os.path.join(downloads_path, file_download_filename)
-                                try:
-                                    with open(save_path, "wb") as f:
-                                        f.write(file_download_bytes)
-                                    print(f"[INFO] File saved to: {save_path} | Size: {len(file_download_bytes)} bytes")
-                                except Exception as e:
-                                    print(f"[ERROR] Failed to save file: {e}")
-
-                                # Reset state
-                                file_download_in_progress = False
-                                file_download_header_parsed = False
-                                file_download_bytes = b''
-                                file_download_buffer = b''
-                                file_download_event.set()
+                                    raise ValueError("Unexpected header format")
                             else:
-                                # Accumulate partial data
-                                file_download_bytes += file_download_buffer
-                                file_download_buffer = b''
-                                print(f"[DEBUG] Accumulated partial data: {len(file_download_bytes)} bytes")
+                                # Accumulate file data
+                                file_download_buffer.extend(data)
+                        else:
+                            # Accumulate file data
+                            file_download_buffer.extend(data)
+
+                        # Check if the file is complete
+                        if file_download_header_parsed and len(file_download_buffer) >= file_download_expected_size:
+                            # Save file to disk
+                            downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+                            os.makedirs(downloads_path, exist_ok=True)
+                            save_path = os.path.join(downloads_path, file_download_filename)
+                            with open(save_path, "wb") as f:
+                                f.write(file_download_buffer[:file_download_expected_size])
+
+                            print(f"[DEBUG] File download complete: {file_download_filename}")
+
+                            # Reset state
+                            file_download_in_progress = False
+                            file_download_header_parsed = False
+                            file_download_buffer = bytearray()
+                            file_download_event.set()
                     except Exception as e:
-                        print(f"[ERROR] File download failed: {e}")
+                        print(f"[ERROR] Exception during file download: {e}")
                         file_download_in_progress = False
                         file_download_header_parsed = False
-                        file_download_bytes = b''
-                        file_download_buffer = b''
+                        file_download_buffer = bytearray()
                         file_download_event.set()
                     continue
 
