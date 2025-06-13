@@ -8,9 +8,17 @@ import time
 import socket
 import os
 import threading
+from plyer import notification
+import re
+from tkinter import PhotoImage, Label
+import json
+import ssl  # Add at the top with other imports
 
 # Declare buttons_frame as a global variable
 buttons_frame = None
+
+# Initialize client socket variable
+client = None
 
 print("Client script started")  # Debug print at start
 
@@ -34,13 +42,30 @@ file_download_buffer      = bytearray()
 file_download_expected_size = 0
 file_download_event       = threading.Event()
 # ——————————————
+selected_user_frame = None 
 
 root = tk.Tk()
 
+# SSL context for secure connection
+ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+# If you have a server certificate, you can load it here:
+# ssl_context.load_verify_locations('server_cert.pem')
+# To disable certificate verification (not recommended for production):
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 # --- Registration/Login UI on root window ---
 def build_login_ui():
+    global status_label  # Declare status_label as global
+    if not root.winfo_exists():
+        # If root is destroyed, do nothing (or recreate root if needed)
+        print("[ERROR] Root window has been destroyed. Cannot build login UI.")
+        return
     for widget in root.winfo_children():
-        widget.destroy()
+        try:
+            widget.destroy()
+        except Exception as e:
+            print(f"[DEBUG] Could not destroy widget: {e}")
     root.title("Login or Register")
     root.geometry("300x250")
     tk.Label(root, text="Username:").pack(pady=5)
@@ -49,17 +74,25 @@ def build_login_ui():
     tk.Label(root, text="Password:").pack(pady=5)
     password_entry = tk.Entry(root, show='*')
     password_entry.pack(pady=5)
-    status_label = tk.Label(root, text="")
+    status_label = tk.Label(root, text="")  # Initialize status_label
     status_label.pack(pady=5)
+
     def do_login():
-        global username, password, client
+        global username, password, client, status_label
         username = username_entry.get()
         password = password_entry.get()
         if not username or not password:
             status_label.config(text="Username and password required.")
             return
         try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if client:
+                try:
+                    client.close()
+                except:
+                    pass
+            # Create a new socket and wrap with SSL
+            raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client = ssl_context.wrap_socket(raw_sock, server_hostname=Server_IP)
             client.connect((Server_IP, port))
             client.send(f"{username}::{password}".encode())
             resp = client.recv(4096).decode('utf-8')
@@ -85,10 +118,14 @@ def build_login_ui():
             root.geometry("800x600")  # Make chat window larger
             show_main_chat_ui()
         except Exception as e:
-            status_label.config(text=f"Login failed: {e}")
+            if status_label and status_label.winfo_exists():
+                status_label.config(text=f"Login failed: {e}")
+            else:
+                print(f"Login failed: {e}")
             if client:
                 client.close()
                 client = None
+
     def do_register():
         global client
         uname = username_entry.get()
@@ -97,6 +134,11 @@ def build_login_ui():
             status_label.config(text="Username and password required.")
             return
         try:
+            if client:
+                try:
+                    client.close()
+                except:
+                    pass
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client.connect((Server_IP, port))
             client.send(f"/register {uname} {pwd}".encode())
@@ -109,12 +151,31 @@ def build_login_ui():
                 status_label.config(text=resp)
         except Exception as e:
             status_label.config(text=f"Registration failed: {e}")
+
     tk.Button(root, text="Login", command=do_login).pack(pady=5)
     tk.Button(root, text="Register", command=do_register).pack(pady=5)
 
+
+def open_server_settings_window():
+    tk.messagebox.showinfo("Server Settings", "This feature is under development.")
+
 def show_main_chat_ui():
+    global admins  # Ensure 'admins' is accessible
+
+    # Initialize the admins list if not already done
+    global admins
+    if 'admins' not in globals():
+        admins = []
+    
+    if username == "meudeux":
+        admins.append(username)
     
     root.title(f"Chat Client - {username}")
+
+    # Initialize bottom_frame before use
+    global bottom_frame
+    bottom_frame = tk.Frame(root)
+    bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
 
     # Add menu bar
     menu_bar = tk.Menu(root)
@@ -166,33 +227,22 @@ def show_main_chat_ui():
     log_thread = threading.Thread(target=log_writer, daemon=True)
     log_thread.start()
 
+    def format_message(message):
+        """Format message with bold, italics, and links."""
+        message = re.sub(r"\*\*(.*?)\*\*", r"\1", message)  # Bold
+        message = re.sub(r"\*(.*?)\*", r"\1", message)  # Italics
+        message = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 (\2)", message)  # Links
+        return message
+
+    # Update display_message to use format_message
+
     def display_message(message):
+        formatted_message = format_message(message)
         chat_display.config(state='normal')
         timestamp = datetime.datetime.now().strftime("%H:%M")
-
-        # Parse message to separate content and unique ID if present
-        if "||" in message:
-            content, _ = message.split("||", 1)  # Extract content before the unique ID
-        else:
-            content = message
-
-        # Clean up private message format
-        if content.startswith("[PM from") or content.startswith("[PM to"):
-            content = content.replace(" (Online)", "")
-
-        # Check if message is from bot "joker"
-        if content.startswith("joker:") or content.startswith("[joker]:") or content.startswith("joker "):
-            chat_display.insert(tk.END, f"[{timestamp}] ", "timestamp")
-            chat_display.insert(tk.END, content + '\n', "bot_message")
-        else:
-            chat_display.insert(tk.END, f"[{timestamp}] ", "timestamp")
-            chat_display.insert(tk.END, content + '\n')
-
+        chat_display.insert(tk.END, f"[{timestamp}] {formatted_message}\n")
         chat_display.config(state='disabled')
         chat_display.yview(tk.END)
-
-        # Add tag configuration for bot messages
-        chat_display.tag_configure("bot_message", foreground="blue", font=("Arial", 10, "italic"))
 
     # Add a button to send message to bot
     def send_message_to_bot():
@@ -201,7 +251,11 @@ def show_main_chat_ui():
             msg_to_send = f"@joker {msg}"
             display_message(f"{username} (to joker): {msg}")
             try:
-                client.send(msg_to_send.encode('utf-8'))
+                if client:
+                    client.send(msg_to_send.encode('utf-8'))
+                else:
+                    print("Client socket is None, cannot send message to bot.")
+                    display_message("Not connected to server.")
             except Exception as e:
                 print(f"Error sending message to bot: {e}")
                 display_message("Failed to send message to bot.")
@@ -214,8 +268,20 @@ def show_main_chat_ui():
 
     root.after(100, add_bot_button)
 
+    # --- Rate limiting state ---
+    last_main_message_time = [0]  # Use list for mutability in nested functions
+    last_group_message_times = {}  # group_name -> last send timestamp
+    RATE_LIMIT_SECONDS = 1.0
+
     # Modify send_message to detect if message is directed to bot and display accordingly
     def send_message(event=None):
+        import time
+        now = time.time()
+        if now - last_main_message_time[0] < RATE_LIMIT_SECONDS:
+            display_message("You are sending messages too quickly. Please wait a moment.")
+            return
+        last_main_message_time[0] = now
+
         msg = entry.get()
         print(f"send_message called with msg: {msg}")  # Debug print
         if msg:
@@ -256,8 +322,12 @@ def show_main_chat_ui():
                 display_message(f"{username}: {msg}")
 
             try:
-                client.send(msg.encode('utf-8'))
-                print("Message sent to server")  # Debug print
+                if client:
+                    client.send(msg.encode('utf-8'))
+                    print("Message sent to server")  # Debug print
+                else:
+                    print("Client socket is None, cannot send message.")
+                    display_message("Not connected to server.")
             except Exception as e:
                 print(f"Error sending message: {e}")
                 display_message("Failed to send message.")
@@ -265,7 +335,10 @@ def show_main_chat_ui():
         else:
             # If message is empty, send typing stopped notification
             try:
-                client.send("__typing_stopped__".encode('utf-8'))
+                if client:
+                    client.send("__typing_stopped__".encode('utf-8'))
+                else:
+                    print("Client socket is None, cannot send typing stopped notification.")
             except Exception as e:
                 print(f"Error sending typing stopped notification: {e}")
 
@@ -386,10 +459,101 @@ def show_main_chat_ui():
 
         open_edit_delete_window.window = window
 
-    # Add Settings menu
+    # --- Group Management Panel ---
+    def open_group_management_window():
+        if hasattr(open_group_management_window, 'window') and open_group_management_window.window.winfo_exists():
+            open_group_management_window.window.lift()
+            return
+        win = tk.Toplevel(root)
+        win.title("Group Management")
+        win.geometry("400x400")
+        open_group_management_window.window = win
+
+        tk.Label(win, text="Your Groups:").pack(pady=5)
+        group_listbox = tk.Listbox(win, width=40, height=10)
+        group_listbox.pack(pady=5)
+
+        def refresh_groups():
+            group_listbox.delete(0, tk.END)
+            if latest_groups_list:
+                for g in latest_groups_list:
+                    group_listbox.insert(tk.END, g)
+            else:
+                group_listbox.insert(tk.END, "No groups found.")
+
+        refresh_groups()
+
+        def create_group():
+            cg_win = tk.Toplevel(win)
+            cg_win.title("Create Group")
+            cg_win.geometry("250x120")
+            tk.Label(cg_win, text="Group Name:").pack(pady=5)
+            name_entry = tk.Entry(cg_win)
+            name_entry.pack(pady=5)
+            def submit():
+                group_name = name_entry.get().strip()
+                if group_name:
+                    try:
+                        client.send(f"/create_group {group_name}".encode('utf-8'))
+                        log_message(f"[Analytics] Created group: {group_name}")
+                        cg_win.destroy()
+                    except Exception as e:
+                        tk.messagebox.showerror("Error", f"Failed to create group: {e}", parent=cg_win)
+            tk.Button(cg_win, text="Create", command=submit).pack(pady=5)
+
+        def invite_user():
+            inv_win = tk.Toplevel(win)
+            inv_win.title("Invite User to Group")
+            inv_win.geometry("250x150")
+            tk.Label(inv_win, text="Group Name:").pack(pady=2)
+            group_entry = tk.Entry(inv_win)
+            group_entry.pack(pady=2)
+            tk.Label(inv_win, text="Username:").pack(pady=2)
+            user_entry = tk.Entry(inv_win)
+            user_entry.pack(pady=2)
+            def submit():
+                group = group_entry.get().strip()
+                user = user_entry.get().strip()
+                if group and user:
+                    try:
+                        client.send(f"/invite_to_group {group} {user}".encode('utf-8'))
+                        log_message(f"[Analytics] Invited {user} to group: {group}")
+                        inv_win.destroy()
+                    except Exception as e:
+                        tk.messagebox.showerror("Error", f"Failed to invite: {e}", parent=inv_win)
+            tk.Button(inv_win, text="Invite", command=submit).pack(pady=5)
+
+        def leave_group():
+            sel = group_listbox.curselection()
+            if not sel:
+                tk.messagebox.showinfo("Info", "Select a group to leave.", parent=win)
+                return
+            group = group_listbox.get(sel[0])
+            if group == "No groups found.":
+                return
+            if tk.messagebox.askyesno("Leave Group", f"Leave group '{group}'?", parent=win):
+                try:
+                    client.send(f"/leave_group {group}".encode('utf-8'))
+                    log_message(f"[Analytics] Left group: {group}")
+                except Exception as e:
+                    tk.messagebox.showerror("Error", f"Failed to leave group: {e}", parent=win)
+
+        btn_frame = tk.Frame(win)
+        btn_frame.pack(pady=10)
+        tk.Button(btn_frame, text="Create Group", command=create_group).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Invite User", command=invite_user).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Leave Group", command=leave_group).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Refresh", command=refresh_groups).pack(side=tk.LEFT, padx=5)
+
+    # Add to Settings menu
     settings_menu = tk.Menu(menu_bar, tearoff=0)
-    settings_menu.add_command(label="Theme", command=open_theme_settings)
-    settings_menu.add_command(label="Edit/Delete My Messages", command=open_edit_delete_window)
+    settings_menu.add_command(label="Group Management", command=open_group_management_window)
+
+    # Add Settings menu to the menu bar
+    menu_bar.add_cascade(label="Settings", menu=settings_menu)
+
+    # Ensure the menu bar is updated after adding all commands
+    root.config(menu=menu_bar)
 
     # Ensure group_window is properly defined and passed where needed
     def open_group_settings():
@@ -557,6 +721,7 @@ def show_main_chat_ui():
             group_chat_window.update()
 
 
+        
         def open_group(group_name):
             try:
                 print(f"[DEBUG] Sending command to open group: {group_name}")
@@ -568,14 +733,12 @@ def show_main_chat_ui():
 
         def fetch_groups():
             def fetch():
+                if not ensure_connected(parent_window=group_chat_window):
+                    return
                 try:
-                    command = "/get_groups"
-                    print(f"[DEBUG] Sending command to server: {command}")
-                    client.send(command.encode('utf-8'))
+                    client.send("/get_groups".encode('utf-8'))
                 except Exception as e:
                     print(f"[DEBUG] Error sending /get_groups: {e}")
-                    group_chat_window.after(0, lambda: tk.messagebox.showerror(
-                        "Error", f"Failed to send /get_groups: {e}", parent=group_chat_window))
             threading.Thread(target=fetch, daemon=True).start()
 
         fetch_groups()
@@ -596,9 +759,6 @@ def show_main_chat_ui():
     # Add "Group" to the Settings menu
     settings_menu.add_command(label="Group", command=open_group_settings)
 
-
-    menu_bar.add_cascade(label="Settings", menu=settings_menu)
-
     chat_display = ScrolledText(root, wrap=tk.WORD, state='disabled', width=50, height=20)
     # Create a frame for chat display and user list
     main_frame = tk.Frame(root)
@@ -606,6 +766,38 @@ def show_main_chat_ui():
 
     chat_display = ScrolledText(main_frame, wrap=tk.WORD, state='disabled', width=50, height=20)
     chat_display.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # --- Message Search/Filtering for Main Chat ---
+    def search_main_chat():
+        query = search_entry.get().strip().lower()
+        chat_display.tag_remove('search_match', '1.0', tk.END)
+        if not query:
+            return
+        start = '1.0'
+        while True:
+            pos = chat_display.search(query, start, stopindex=tk.END, nocase=True)
+            if not pos:
+                break
+            end = f"{pos}+{len(query)}c"
+            chat_display.tag_add('search_match', pos, end)
+            start = end
+        chat_display.tag_config('search_match', background='yellow', foreground='black')
+        # Scroll to first match
+        first = chat_display.search(query, '1.0', stopindex=tk.END, nocase=True)
+        if first:
+            chat_display.see(first)
+
+    search_frame = tk.Frame(main_frame)
+    search_frame.pack(fill=tk.X, padx=5, pady=(0, 5))
+    search_entry = tk.Entry(search_frame, width=30)
+    search_entry.pack(side=tk.LEFT, padx=(0, 5))
+    search_btn = tk.Button(search_frame, text="Search", command=search_main_chat)
+    search_btn.pack(side=tk.LEFT)
+    def clear_search():
+        search_entry.delete(0, tk.END)
+        chat_display.tag_remove('search_match', '1.0', tk.END)
+    clear_btn = tk.Button(search_frame, text="Clear", command=clear_search)
+    clear_btn.pack(side=tk.LEFT, padx=(5,0))
 
     # Dictionary to map message_id to text widget indices for editing/deletion
     message_id_to_index = {}
@@ -725,7 +917,7 @@ def show_main_chat_ui():
 
     # User list box
     user_listbox = tk.Listbox(main_frame, width=20, height=20)
-    user_listbox.pack(side=tk.LEFT, fill=tk.Y, padx=5)
+    user_listbox.pack(side=tk.LEFT, fill=tk.Y, padx=5, expand=True)
 
     # Create a frame at the bottom for entry and emoji button
     bottom_frame = tk.Frame(root)
@@ -792,7 +984,7 @@ def show_main_chat_ui():
                     listbox.delete(index)
                 except Exception as e:
                     print(f"Error sending delete command: {e}")
-        
+
         delete_btn = tk.Button(btn_frame, text="Delete", command=delete_selected)
         delete_btn.pack(side=tk.LEFT, padx=5)
 
@@ -893,9 +1085,13 @@ def show_main_chat_ui():
 
     def on_typing(event=None):
         # Send typing notification to server
-        client.send(f"__typing__:{username}".encode())
+        try:
+            if client:
+                client.send(f"__typing__:{username}".encode())
+        except Exception as e:
+            print(f"Error sending typing notification: {e}")
 
-        entry.bind("<KeyPress>", on_typing)
+    entry.bind("<KeyPress>", on_typing)
 
     # Define group_chat_windows to manage group chat windows
     group_chat_windows = {}
@@ -903,7 +1099,6 @@ def show_main_chat_ui():
     # Implement open_group_chat_window to handle opening group chat windows
     def open_group_chat_window(group_name):
         if group_name in group_chat_windows:
-            # If the window already exists, bring it to the front
             group_chat_windows[group_name]['window'].deiconify()
             group_chat_windows[group_name]['window'].lift()
             return
@@ -912,15 +1107,46 @@ def show_main_chat_ui():
         group_window = tk.Toplevel(root)
         group_window.title(f"Group Chat - {group_name}")
         group_window.geometry("500x350")
+        group_window.minsize(400, 250)
 
         # Configure grid layout
         group_window.grid_rowconfigure(0, weight=1)
-        group_window.grid_columnconfigure(0, weight=1)
-        group_window.grid_columnconfigure(1, weight=0)
+        group_window.grid_columnconfigure(0, weight=4)
+        group_window.grid_columnconfigure(1, weight=1)
+
+        # --- Group Chat Search ---
+        group_search_frame = tk.Frame(group_window)
+        group_search_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(0, 2))
+        group_search_entry = tk.Entry(group_search_frame, width=30)
+        group_search_entry.pack(side=tk.LEFT, padx=(0, 5))
+        def group_search():
+            query = group_search_entry.get().strip().lower()
+            chat_display.tag_remove('search_match', '1.0', tk.END)
+            if not query:
+                return
+            start = '1.0'
+            while True:
+                pos = chat_display.search(query, start, stopindex=tk.END, nocase=True)
+                if not pos:
+                    break
+                end = f"{pos}+{len(query)}c"
+                chat_display.tag_add('search_match', pos, end)
+                start = end
+            chat_display.tag_config('search_match', background='yellow', foreground='black')
+            first = chat_display.search(query, '1.0', stopindex=tk.END, nocase=True)
+            if first:
+                chat_display.see(first)
+        group_search_btn = tk.Button(group_search_frame, text="Search", command=group_search)
+        group_search_btn.pack(side=tk.LEFT)
+        def group_clear_search():
+            group_search_entry.delete(0, tk.END)
+            chat_display.tag_remove('search_match', '1.0', tk.END)
+        group_clear_btn = tk.Button(group_search_frame, text="Clear", command=group_clear_search)
+        group_clear_btn.pack(side=tk.LEFT, padx=(5,0))
 
         # Chat display in the main area
         chat_display = ScrolledText(group_window, wrap=tk.WORD, state='disabled', width=50, height=15)
-        chat_display.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        chat_display.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
         # Members list on the right side
         members_frame = tk.Frame(group_window, width=150)
@@ -935,10 +1161,50 @@ def show_main_chat_ui():
         entry_frame = tk.Frame(group_window)
         entry_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
 
+        entry_frame.grid_columnconfigure(0, weight=1)
         entry = tk.Entry(entry_frame)
         entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
+        send_button = tk.Button(entry_frame, text="Send", command=lambda: send_group_message())
+        send_button.pack(side=tk.RIGHT, padx=5, pady=0)
+
+        # Typing indicator label for group chat
+        group_typing_label = tk.Label(entry_frame, text="", fg="gray")
+        group_typing_label.pack(side=tk.LEFT, padx=5)
+
+        # Track users currently typing in this group
+        group_typing_users = set()
+
+        # Function to update the typing label
+        def update_group_typing_label():
+            if group_typing_users:
+                users_typing = ', '.join(group_typing_users)
+                group_typing_label.config(text=f"{users_typing} typing...")
+            else:
+                group_typing_label.config(text="")
+
+        def send_group_typing(event=None):
+            try:
+                if client:
+                    client.send(f"__group_typing__:{group_name}:{username}".encode('utf-8'))
+            except Exception as e:
+                print(f"Error sending group typing notification: {e}")
+
+        entry.bind("<KeyPress>", send_group_typing)
+
         def send_group_message(event=None):
+            import time
+            now = time.time()
+            last_time = last_group_message_times.get(group_name, 0)
+            if now - last_time < RATE_LIMIT_SECONDS:
+                # Use the group chat window's typing label for feedback
+                if group_name in group_chat_windows:
+                    group_chat_windows[group_name]['group_typing_label'].config(text="You are sending messages too quickly. Please wait.")
+                    group_chat_windows[group_name]['window'].after(1500, group_chat_windows[group_name]['update_group_typing_label'])
+                return
+            last_group_message_times[group_name] = now
+            if not ensure_connected(parent_window=group_window):
+                return
             msg = entry.get()
             if msg:
                 msg_to_send = f"/group_msg {group_name} {msg}"
@@ -951,16 +1217,20 @@ def show_main_chat_ui():
 
         entry.bind("<Return>", send_group_message)
 
-        send_button = tk.Button(entry_frame, text="Send", command=send_group_message)
-        send_button.pack(side=tk.RIGHT, padx=5, pady=0)
-
         def on_close():
             group_chat_windows.pop(group_name, None)
             group_window.destroy()
 
         group_window.protocol("WM_DELETE_WINDOW", on_close)
 
-        group_chat_windows[group_name] = {'window': group_window, 'chat_display': chat_display, 'members_listbox': members_listbox}
+        group_chat_windows[group_name] = {
+            'window': group_window,
+            'chat_display': chat_display,
+            'members_listbox': members_listbox,
+            'group_typing_label': group_typing_label,
+            'group_typing_users': group_typing_users,
+            'update_group_typing_label': update_group_typing_label
+        }
 
     cached_group_info = {}
 
@@ -986,7 +1256,11 @@ def show_main_chat_ui():
             print(f"[DEBUG] Sending file transfer request: /send_file {filename} {filesize}")
             cmd = f"/send_file {filename} {filesize}"
             print(f"[DEBUG] Raw command sent (repr): {repr(cmd)}")
-            client.send(cmd.encode('utf-8'))
+            if client:
+                client.send(cmd.encode('utf-8'))
+            else:
+                print("Client socket is None, cannot send file transfer request.")
+                display_message("Not connected to server.")
 
             # Wait for ACK from receive_messages thread
             print("[DEBUG] Waiting for ACK from server...")
@@ -1030,6 +1304,7 @@ def show_main_chat_ui():
             print(f"[ERROR] Failed to send file: {e}")
             display_message(f"Failed to send file: {e}")
  
+ 
 
     def request_file():
         def fetch_list():
@@ -1055,7 +1330,6 @@ def show_main_chat_ui():
                         f"Não foi possível obter lista de ficheiros:\n{e}"))
         threading.Thread(target=fetch_list, daemon=True).start()
 
-    # ... mais acima em show_main_chat_ui() onde defines os botões:
     file_get_btn = tk.Button(bottom_frame, text="Get File", command=request_file)
     file_get_btn.pack(side=tk.LEFT, padx=5)
 
@@ -1111,11 +1385,14 @@ def show_main_chat_ui():
 
         display_message("Attempting to reconnect...")
         try:
-            client.close()
+            if client:
+                client.close()
         except:
             pass
 
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Create a new socket and wrap with SSL
+        raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client = ssl_context.wrap_socket(raw_sock, server_hostname=Server_IP)
         try:
             client.connect((Server_IP, port))
             if password:
@@ -1128,6 +1405,87 @@ def show_main_chat_ui():
             display_message(f"Reconnect failed: {e}")
             # Retry after delay
             root.after(5000, reconnect)
+
+    def notify_user(title, message):
+        """Show a desktop notification."""
+        notification.notify(
+            title=title,
+            message=message,
+            app_name="Chat Application",
+            timeout=5  # Notification duration in seconds
+        )
+
+    # List of admin users
+    admins = ["meudeux"]  # Replace "admin" with the default admin username
+
+    # Function to grant admin privileges
+    def grant_admin(username):
+        if username not in admins:
+            admins.append(username)
+            display_message(f"{username} has been granted admin privileges.")
+        else:
+            display_message(f"{username} is already an admin.")
+
+    # Add a button to open a dialog to grant admin privileges
+    def open_grant_admin_dialog():
+        def submit():
+            user_to_grant = entry.get().strip()
+            if user_to_grant:
+                try:
+                    client.send(f"/grant_admin {user_to_grant}".encode('utf-8'))
+                    grant_admin(user_to_grant)
+                    dialog.destroy()
+                except Exception as e:
+                    display_message(f"Failed to send grant admin command: {e}")
+            else:
+                display_message("Username cannot be empty.")
+
+        dialog = tk.Toplevel(root)
+        dialog.title("Grant Admin Privileges")
+        dialog.geometry("300x120")
+        tk.Label(dialog, text="Enter username to grant admin:").pack(pady=10)
+        entry = tk.Entry(dialog)
+        entry.pack(pady=5)
+        tk.Button(dialog, text="Grant", command=submit).pack(pady=5)
+
+    # Add the grant admin button to the bottom frame if user is admin
+    if username in admins:
+        grant_admin_button = tk.Button(bottom_frame, text="Grant Admin", command=open_grant_admin_dialog)
+        grant_admin_button.pack(side=tk.LEFT, padx=5)
+
+
+    # Helper to ensure client is connected before sending/receiving
+    def ensure_connected(parent_window=None):
+        global client, username, password
+        if client is None:
+            try:
+                raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client = ssl_context.wrap_socket(raw_sock, server_hostname=Server_IP)
+                client.connect((Server_IP, port))
+                if password:
+                    client.send(f"{username}::{password}".encode())
+                else:
+                    client.send(username.encode())
+                # Optionally, start receive_messages thread if not running
+                threading.Thread(target=receive_messages, daemon=True).start()
+                return True
+            except Exception as e:
+                if parent_window:
+                    tk.messagebox.showerror("Connection Error", f"Could not connect to server: {e}", parent=parent_window)
+                else:
+                    print(f"[ERROR] Could not connect to server: {e}")
+                return False
+        return True
+
+    # Initial connection (before show_main_chat_ui is called)
+    # Replace any direct socket creation with SSL-wrapped socket
+    # Example:
+    # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # client.connect((Server_IP, port))
+    # Should become:
+    # raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # client = ssl_context.wrap_socket(raw_sock, server_hostname=Server_IP)
+    # client.connect((Server_IP, port))
 
     def receive_messages():
         global file_download_in_progress, file_download_buffer
@@ -1150,6 +1508,42 @@ def show_main_chat_ui():
                     display_message("Disconnected from server.")
                     reconnect()
                     break
+                try:
+                    msg = data.decode('utf-8')
+                except UnicodeDecodeError:
+                    msg = None
+                if not msg:
+                    continue
+                # --- Group typing indicator handling ---
+                if msg.startswith("__group_typing__:"):
+                    # Format: __group_typing__:<group_name>:<username>
+                    try:
+                        _, group_name, typing_user = msg.strip().split(":", 2)
+                        if group_name in group_chat_windows:
+                            group_chat_window = group_chat_windows[group_name]
+                            group_typing_users = group_chat_window['group_typing_users']
+                            group_typing_users.add(typing_user)
+                            group_chat_window['update_group_typing_label']()
+                            def clear_group_typing(user=typing_user, gname=group_name):
+                                if gname in group_chat_windows:
+                                    group_typing_users = group_chat_windows[gname]['group_typing_users']
+                                    group_typing_users.discard(user)
+                                    group_chat_windows[gname]['update_group_typing_label']()
+                            root.after(3000, clear_group_typing)
+                    except Exception as e:
+                        print(f"Error processing __group_typing__: {e}")
+                    continue
+                if msg.startswith("__group_typing_stopped__:"):
+                    # Format: __group_typing_stopped__:<group_name>:<username>
+                    try:
+                        _, group_name, typing_user = msg.strip().split(":", 2)
+                        if group_name in group_chat_windows:
+                            group_typing_users = group_chat_windows[group_name]['group_typing_users']
+                            group_typing_users.discard(typing_user)
+                            group_chat_windows[group_name]['update_group_typing_label']()
+                    except Exception as e:
+                        print(f"Error processing __group_typing_stopped__: {e}")
+                    continue
 
                 # Handle file download state machine
                 try:
@@ -1217,12 +1611,22 @@ def show_main_chat_ui():
                     # This is likely file data, skip displaying
                     continue
 
-                # Handle file transfer ACK messages
-                if msg.startswith("ACK:"):
-                    global file_transfer_ack
-                    file_transfer_ack = msg.strip()
-                    file_transfer_event.set()
-                    continue  # Do NOT display in chat
+                # Notify user for new messages or mentions
+                if msg.startswith("[PM from") or msg.startswith("[Group msg]"):
+                    try:
+                        if msg.startswith("[PM from"):
+                            sender = msg.split("[PM from ", 1)[1].split("]", 1)[0]
+                            notify_user("New Private Message", f"Message from {sender}")
+                        elif msg.startswith("[Group msg]"):
+                            content = msg[len("[Group msg]"):].strip()
+                            group_name, rest = content.split(" ", 1)
+                            sender, message_text = rest.split(":", 1)
+                            if username in message_text:
+                                notify_user("Mention in Group Chat", f"{sender} mentioned you in {group_name}")
+                            else:
+                                notify_user("New Group Message", f"Message in {group_name} from {sender}")
+                    except Exception as e:
+                        print(f"Error processing notification: {e}")
 
                 # Ignore all file transfer protocol messages
                 if (
@@ -1381,27 +1785,112 @@ def show_main_chat_ui():
                         display_message(f"File shared: {filename} (by {sender}) - Use 'Get File' to download.")
                     except Exception as e:
                         display_message(f"File shared, but error parsing notification: {e}")
-                else:
-                    # Filter out messages that are protocol/debug/stray or look like code/debug output
-                    protocol_prefixes = [
-                        "__file_list__:", "__file_start__:", "__file_end__:", "ACK:",
-                        "Ready to receive file ", "File '", "uploaded successfully", "Error sending file:", "Error listing files:",
-                        "__group_info__:", "__groups__:", "__history__:", "__typing__:", "__user_list__:", "[PM from", "[Group msg]", "__file_shared__:",
-                    ]
-                    code_like_prefixes = [
-                        "pattern = r", "match = re.match", "if not match:", "import re", "def ", "class ", "print(", "print ", "try:", "except ", "return ", "continue", "break", "global ", "client.send", "client.recv", "def send_", "def open_", "def on_", "def handle_", "def request_", "def fetch_", "def download_", "def accept_", "def populate_", "def clear_", "def edit_", "def delete_", "def send_message", "def receive_messages", "def reconnect", "def handle_exit"
-                    ]
-                    msg_stripped = msg.strip()
-                    if any(msg_stripped.startswith(prefix) for prefix in protocol_prefixes):
-                        continue  # Do NOT display protocol/debug messages
-                    if any(msg_stripped.startswith(prefix) for prefix in code_like_prefixes):
-                        continue  # Do NOT display code-like messages
-                    # Also filter out messages that look like debug logs or contain debug markers
-                    debug_markers = ["[DEBUG]", "[INFO]", "[ERROR]", "[WARNING]", "[TRACE]"]
-                    if any(marker in msg for marker in debug_markers):
-                        continue
-                    # Only now display the message
-                    display_message(msg)
+                elif msg.strip() == "__close_app__":
+                    print("[DEBUG] Received __close_app__ from server. Closing app.")
+                    def close_app():
+                        print("You have been kicked by an admin. The app will now close.")
+                        root.quit()
+                        root.destroy()
+                        import os
+                        os._exit(0)
+                    root.after(0, close_app)
+                elif msg.strip().startswith("[") and "] /close_app " in msg:
+                    # Handles messages like: [admin] /close_app username||id
+                    try:
+                        prefix, rest = msg.split("] /close_app ", 1)
+                        target = rest.strip()
+                        if target.startswith(username):
+                            print(f"[DEBUG] Received bracketed close_app for user {username}. Closing app.")
+                            def close_app():
+                                print("You have been kicked by an admin. The app will now close.")
+                                root.quit()
+                                root.destroy()
+                                import os
+                                os._exit(0)
+                            root.after(0, close_app)
+                            continue
+                    except Exception as e:
+                        print(f"[ERROR] Error processing bracketed close_app message: {e}")
+                elif msg.strip().startswith("[") and "] /kick " in msg:
+                    # Handles messages like: [admin] /kick username||id
+                    try:
+                        prefix, rest = msg.split("] /kick ", 1)
+                        target = rest.strip()
+                        if target.startswith(username):
+                            print(f"[DEBUG] Received bracketed kick for user {username}. Closing app.")
+                            def close_app():
+                                print("You have been kicked by an admin. The app will now close.")
+                                root.quit()
+                                root.destroy()
+                                os._exit(0)
+                            root.after(0, close_app)
+                            continue
+                    except Exception as e:
+                        print(f"[ERROR] Error processing bracketed kick message: {e}")
+                elif msg.strip().startswith("[") and "] /ban " in msg:
+                    # Handles messages like: [admin] /ban username||id
+                    try:
+                        prefix, rest = msg.split("] /ban ", 1)
+                        target = rest.strip()
+                        if target.startswith(username):
+                            print(f"[DEBUG] Received bracketed ban for user {username}. Deleting account and closing app.")
+                            def ban_and_close():
+                                # Delete cached user data files
+                                cached_files = [
+                                   
+                                    'cached_group_info.py',
+                                    'chat_log.txt',
+                                ]
+                                for fname in cached_files:
+                                    try:
+                                        if os.path.exists(fname):
+                                            os.remove(fname)
+                                            print(f"[DEBUG] Deleted cached file: {fname}")
+                                    except Exception as e:
+                                        print(f"[ERROR] Failed to delete cached file {fname}: {e}")
+                                # Delete user from database
+                                try:
+                                    import sqlite3
+                                    db_path = 'db.sqlite3'
+                                    if os.path.exists(db_path):
+                                        conn = sqlite3.connect(db_path)
+                                        cur = conn.cursor()
+                                        cur.execute("DELETE FROM users WHERE username = ?", (username,))
+                                        conn.commit()
+                                        cur.close()
+                                        conn.close()
+                                        print(f"[DEBUG] Deleted user {username} from database.")
+                                    else:
+                                        print(f"[DEBUG] Database file {db_path} does not exist.")
+                                except Exception as e:
+                                    print(f"[ERROR] Failed to delete user from database: {e}")
+                                print("You have been banned by an admin. Your account will be deleted and the app will now close.")
+                                root.quit()
+                                root.destroy()
+                                os._exit(0)
+                            root.after(0, ban_and_close)
+                            continue
+                    except Exception as e:
+                        print(f"[ERROR] Error processing bracketed ban message: {e}")
+                protocol_prefixes = [
+                    "__file_list__:", "__file_start__:", "__file_end__:",
+                    "ACK:", "Ready to receive file ", "File '", "uploaded successfully",
+                    "Error sending file:", "Error listing files:", "__group_info__:", "__groups__:", "__history__:", "__typing__:", "__user_list__:", "[PM from", "[Group msg]", "__file_shared__:",
+                ]
+                code_like_prefixes = [
+                    "pattern = r", "match = re.match", "if not match:", "import re", "def ", "class ", "print(", "print ", "try:", "except ", "return ", "continue", "break", "global ", "client.send", "client.recv", "def send_", "def open_", "def on_", "def handle_", "def request_", "def fetch_", "def download_", "def accept_", "def populate_", "def clear_", "def edit_", "def delete_", "def send_message", "def receive_messages", "def reconnect", "def handle_exit"
+                ]
+                msg_stripped = msg.strip()
+                if any(msg_stripped.startswith(prefix) for prefix in protocol_prefixes):
+                    continue  # Do NOT display protocol/debug messages
+                if any(msg_stripped.startswith(prefix) for prefix in code_like_prefixes):
+                    continue  # Do NOT display code-like messages
+                # Also filter out messages that look like debug logs or contain debug markers
+                debug_markers = ["[DEBUG]", "[INFO]", "[ERROR]", "[WARNING]", "[TRACE]"]
+                if any(marker in msg for marker in debug_markers):
+                    continue
+                # Only now display the message
+                display_message(msg)
                 # At the end of all protocol checks, before the except block:
                 print(f"[DEBUG] Unmatched message in receive_messages: {repr(msg)}")
             except Exception as e:
@@ -1429,7 +1918,212 @@ def show_main_chat_ui():
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
 
-print("Showing login/register window")  # Debug print before showing login/register
-build_login_ui()
+    WINDOW_STATE_FILE = 'window_state.json'
+    
+    def save_window_state(window, key):
+        state = {}
+        if os.path.exists(WINDOW_STATE_FILE):
+            try:
+                with open(WINDOW_STATE_FILE, 'r') as f:
+                    state = json.load(f)
+            except Exception:
+                state = {}
+        state[key] = window.geometry()
+        with open(WINDOW_STATE_FILE, 'w') as f:
+            json.dump(state, f)
+    
+    def load_window_state(window, key, default_geometry=None):
+        if os.path.exists(WINDOW_STATE_FILE):
+            try:
+                with open(WINDOW_STATE_FILE, 'r') as f:
+                    state = json.load(f)
+                if key in state:
+                    window.geometry(state[key])
+                    return
+            except Exception:
+                pass
+        if default_geometry:
+            window.geometry(default_geometry)
+    
+    # In show_main_chat_ui, after root is created:
+    load_window_state(root, 'main', default_geometry='800x600')
+    
+    # When closing main window, save state
+    old_handle_exit = handle_exit
+    
+    def handle_exit(signal_received, frame):
+        save_window_state(root, 'main')
+        old_handle_exit(signal_received, frame)
+    
+    # Patch signal handlers to use new handle_exit
+    import signal
+    signal.signal(signal.SIGINT, handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+    
+    # In open_group_chat_window, restore and save geometry
+    old_open_group_chat_window = open_group_chat_window
 
-root.mainloop()
+    def open_group_chat_window(group_name):
+        if group_name in group_chat_windows:
+            group_chat_windows[group_name]['window'].deiconify()
+            group_chat_windows[group_name]['window'].lift()
+            return
+
+        # Create a new group chat window
+        group_window = tk.Toplevel(root)
+        load_window_state(group_window, f'group_{group_name}', default_geometry='500x350')
+        group_window.title(f"Group Chat - {group_name}")
+    
+        group_window.geometry("500x350")
+        group_window.minsize(400, 250)
+    
+        # Configure grid layout
+        group_window.grid_rowconfigure(0, weight=1)
+        group_window.grid_columnconfigure(0, weight=4)
+        group_window.grid_columnconfigure(1, weight=1)
+    
+        # --- Group Chat Search ---
+        group_search_frame = tk.Frame(group_window)
+        group_search_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(0, 2))
+        group_search_entry = tk.Entry(group_search_frame, width=30)
+        group_search_entry.pack(side=tk.LEFT, padx=(0, 5))
+        def group_search():
+            query = group_search_entry.get().strip().lower()
+            chat_display.tag_remove('search_match', '1.0', tk.END)
+            if not query:
+                return
+            start = '1.0'
+            while True:
+                pos = chat_display.search(query, start, stopindex=tk.END, nocase=True)
+                if not pos:
+                    break
+                end = f"{pos}+{len(query)}c"
+                chat_display.tag_add('search_match', pos, end)
+                start = end
+            chat_display.tag_config('search_match', background='yellow', foreground='black')
+            first = chat_display.search(query, '1.0', stopindex=tk.END, nocase=True)
+            if first:
+                chat_display.see(first)
+        group_search_btn = tk.Button(group_search_frame, text="Search", command=group_search)
+        group_search_btn.pack(side=tk.LEFT)
+        def group_clear_search():
+            group_search_entry.delete(0, tk.END)
+            chat_display.tag_remove('search_match', '1.0', tk.END)
+        group_clear_btn = tk.Button(group_search_frame, text="Clear", command=group_clear_search)
+        group_clear_btn.pack(side=tk.LEFT, padx=(5,0))
+
+        # Chat display in the main area
+        chat_display = ScrolledText(group_window, wrap=tk.WORD, state='disabled', width=50, height=15)
+        chat_display.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Members list on the right side
+        members_frame = tk.Frame(group_window, width=150)
+        members_frame.grid(row=0, column=1, padx=5, pady=10, sticky="ns")
+
+        tk.Label(members_frame, text="Members:").pack(pady=5)
+
+        members_listbox = tk.Listbox(members_frame, width=20, height=15)
+        members_listbox.pack(pady=5, fill=tk.Y, expand=True)
+
+        # Entry frame at the bottom
+        entry_frame = tk.Frame(group_window)
+        entry_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+
+        entry_frame.grid_columnconfigure(0, weight=1)
+        entry = tk.Entry(entry_frame)
+        entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        send_button = tk.Button(entry_frame, text="Send", command=lambda: send_group_message())
+        send_button.pack(side=tk.RIGHT, padx=5, pady=0)
+
+        # Typing indicator label for group chat
+        group_typing_label = tk.Label(entry_frame, text="", fg="gray")
+        group_typing_label.pack(side=tk.LEFT, padx=5)
+
+        # Track users currently typing in this group
+        group_typing_users = set()
+
+        # Function to update the typing label
+        def update_group_typing_label():
+            if group_typing_users:
+                users_typing = ', '.join(group_typing_users)
+                group_typing_label.config(text=f"{users_typing} typing...")
+            else:
+                group_typing_label.config(text="")
+
+        def send_group_typing(event=None):
+            try:
+                if client:
+                    client.send(f"__group_typing__:{group_name}:{username}".encode('utf-8'))
+            except Exception as e:
+                print(f"Error sending group typing notification: {e}")
+
+        entry.bind("<KeyPress>", send_group_typing)
+
+        def send_group_message(event=None):
+            import time
+            now = time.time()
+            last_time = last_group_message_times.get(group_name, 0)
+            if now - last_time < RATE_LIMIT_SECONDS:
+                # Use the group chat window's typing label for feedback
+                if group_name in group_chat_windows:
+                    group_chat_windows[group_name]['group_typing_label'].config(text="You are sending messages too quickly. Please wait.")
+                    group_chat_windows[group_name]['window'].after(1500, group_chat_windows[group_name]['update_group_typing_label'])
+                return
+            last_group_message_times[group_name] = now
+            if not ensure_connected(parent_window=group_window):
+                return
+            msg = entry.get()
+            if msg:
+                msg_to_send = f"/group_msg {group_name} {msg}"
+                try:
+                    client.send(msg_to_send.encode('utf-8'))
+                    entry.delete(0, tk.END)
+                except Exception as e:
+                    print(f"Error sending group message: {e}")
+                    tk.messagebox.showerror("Error", "Failed to send group message.", parent=group_window)
+
+        entry.bind("<Return>", send_group_message)
+
+        def on_close():
+            group_chat_windows.pop(group_name, None)
+            group_window.destroy()
+
+        group_window.protocol("WM_DELETE_WINDOW", on_close)
+
+        group_chat_windows[group_name] = {
+            'window': group_window,
+            'chat_display': chat_display,
+            'members_listbox': members_listbox,
+            'group_typing_label': group_typing_label,
+            'group_typing_users': group_typing_users,
+            'update_group_typing_label': update_group_typing_label
+        }
+
+    # Automatically open the group chat window for the default group (if any)
+    if latest_groups_list and len(latest_groups_list) == 1:
+        def open_default_group():
+            open_group_chat_window(latest_groups_list[0])
+            if hasattr(open_group_chat_dialog, 'update_ui'):
+                open_group_chat_dialog.group_chat_window.after(0, open_group_chat_dialog.update_ui)
+        root.after(1000, open_default_group)
+
+    # Synchronize file transfer state
+    def sync_file_transfer_state():
+        global file_download_in_progress, file_download_request
+        if file_download_in_progress and file_download_request:
+            try:
+                client.send(f"/get_file {file_download_request}".encode())
+            except Exception as e:
+                print(f"Error resending file download request: {e}")
+        root.after(5000, sync_file_transfer_state)
+
+    # Start syncing file transfer state
+    sync_file_transfer_state()
+
+def main():
+    build_login_ui()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
